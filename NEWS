@@ -1,0 +1,73 @@
+Version 1.1.0 (23-07-2014)
+- Vignette update
+- Minor bugs correction 
+
+Version 1.0.5 (24-06-2014)
+- Vignette corrections for allele B fraction segmentations
+- Correction of getFracBsignal and segFracB 
+
+Version 1.0.4 (19-06-2014)
+- Vignette bibtex correction
+- Modification of allele B fraction segmentation for single study case
+- Modification of slope heuristic method for cghseg
+
+Version 1.0.3 (15-05-2014)
+- Add cghseg method for segmentation.
+- No more export of PELT and PELTaroma. Use segmentation and segmentationAroma instead.
+- Upgrade all documentations with roxygen2 4.0.0
+- Modification of the installation instruction in the vignette and in the code
+
+Version 1.0.2 (13-05-2014)
+- BUG FIX : findGender now use normal sample instead of tumor sample
+
+Version 1.0.1 (17-03-2014)
+- Minor changes in vignette and documentation.
+- First stable version to be submitted to the CRAN
+
+Version 0.41.3 (14-03-2014)
+- EVOLUTION : Modification of aroma architecture management
+    - CreateEmptyArchiteture no more exported
+    - Creation of new data folders and chip folders by addData and addChip function
+- Changes in documentation to be more consistent with vignette
+- Changes in vignette
+    - Maths formula of Lasso
+    - Minor changes
+
+Version 0.41.2 (13-03-2014)
+- BUG FIX : SNP filtering for cytoscan_HD microarray
+- Changes in vignette
+    - Citations
+    - minor changes
+
+Version 0.41.1 (06-03-2014)
+- Adding citation chapter in Vignette
+
+Version 0.41 (06-03-2014)
+- force rewrite of graphics with tumorboost
+- Minor corrections in Vignette
+
+Version 0.40.10 (05-03-2014)
+- BUG FIX : Management of Normal-tumor pairs for tumorboost.
+- Correcting some vignette examples. 
+
+Version 0.40.9 (28-02-2014)
+- Correction of the starting example section (1.3) of the vignette : adding parameter"loss=linear" in markerSelection.
+
+Version 0.40.8 (27-02-2014)
+- BUG FIX : correction of the "unable to evaluate fonction with inital parameter" bug. Correction applied in private.R .minusEloglikreg function
+
+Version 0.40.7 (27-02-2014)
+- New version to force r-forge to recompile
+
+Version 0.40.6 (25-02-2014)
+- BUG FIX : Tags mangement : checking NULL value before checking character 
+- rename ChangeLog into NEWS
+
+Version 0.40.5 (25-02-2014)
+- Adding tag management for chip files
+- Vignette update
+
+Version 0.40.4 (24-02-2014)
+-Adding copyrights and authors
+-Adding citation file
+-Adding changelog

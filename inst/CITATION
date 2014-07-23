@@ -1,0 +1,18 @@
+citHeader("To cite package 'MPAgenomics' in publications use:")
+
+year <- sub(".*(2[[:digit:]]{3})-.*", "\\1", meta$Date, perl = TRUE)
+vers <- paste("R package version", meta$Version)
+author = meta$Author
+title = meta$Title
+
+citEntry(entry = "unpublished",
+         title = "MPAgenomics : An R package for multi-patient analysis of genomic markers",
+         author = personList(as.person("Quentin Grimonprez"),
+                             as.person("Alain Celisse"),
+                             as.person("Meyling Cheok"),
+                             as.person("Martin Figeac"),
+                             as.person("Guillemette Marot")),
+         year = "2014",
+         note = "Preprint",
+         url = "http://hal.inria.fr/hal-00933614",
+         textVersion = paste0("Quentin Grimonprez, Alain Celisse, Meyling Cheok, Martin Figeac, Guillemette Marot"," (2014). ", "MPAgenomics : An R package for multi-patient analysis of genomic markers",". "))
