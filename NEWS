@@ -1,3 +1,15 @@
+Version 1.1.2 (29-10-2014)
+- Changes for HDPenReg 0.90
+- Add knee to SNPselection
+- update vignette
+
+Version 1.1.1 (09-10-2014)
+- Add HDPenReg in Imports field
+- Add spikeslab in markerSelection function
+- Bugs correction in markerSelection for logistic loss
+- Default value correction for cv.glmnet in markerSelection
+- Code factorization in SNPselection.R
+
 Version 1.1.0 (23-07-2014)
 - Vignette update
 - Minor bugs correction 

@@ -13,7 +13,8 @@
 #' @param nbFolds number of folds in the cross validation (default=10).
 #' @param loss either "logistic" (binary response) or "linear" (quantitative response), default is "logistic"
 #' @param plot If TRUE, cross-validation mean squared error is plotted (default=TRUE).
-#' @param ... Other parameters for HDlars function or glmnet function.
+#' @param pkg Either "HDPenReg" or "spikeslab". Ued package in linear case.
+#' @param ... Other parameters for HDlars, glmnet or spikeslab function.
 #' 
 #' @return a list containing length(chromosme) elements. Each element is a list containing
 #' \describe{
@@ -29,18 +30,19 @@
 #' @details This function requires to use the aroma folder architecture. In your working directory, there must have the rawData folder and totalAndFracBData folder.
 #' This function launches the lars algorithm on the CN or fracB data and uses a cross-validation to select the most appropriate solution.
 #' 
-#' @examples
-#' #DO NOT EXECUTE
-#' # res=markerSelection("DataB",rnorm(27),chromosome=22,signal="CN",normalTumorArray,onlySNP=TRUE)
 #' 
-#' @seealso HDPenReg
+#' @seealso HDPenReg, glmnet, spikeslab
 #'
 #' @author Quentin Grimonprez
 #'
 #' @export
 #'
-markerSelection=function(dataSetName,dataResponse,chromosome=1:22,signal="CN",normalTumorArray,onlySNP=FALSE,nbFolds=min(length(dataResponse),10),loss="logistic",plot=TRUE,...)
+markerSelection=function(dataSetName,dataResponse,chromosome=1:22,signal=c("CN","fracB"),normalTumorArray,onlySNP=FALSE,nbFolds=10,loss=c("logistic","linear"),plot=TRUE,pkg=c("HDPenReg","spikeslab"),...)
 {
+  loss <- match.arg(loss)
+  signal <- match.arg(signal)
+  pkg <- match.arg(pkg)
+  
   allpkg=TRUE
   if(!suppressPackageStartupMessages(require("aroma.affymetrix", quietly=TRUE) ) )
   {
@@ -55,8 +57,7 @@ markerSelection=function(dataSetName,dataResponse,chromosome=1:22,signal="CN",no
     cat("install.packages(\"aroma.affymetrix\")\n")
     allpkg=FALSE
   }
-  #   else
-  #     cat("Package aroma.affymetrix loaded.\n")
+  
   
   if(!suppressPackageStartupMessages(require("aroma.cn", quietly=TRUE) ) )
   {
@@ -64,25 +65,6 @@ markerSelection=function(dataSetName,dataResponse,chromosome=1:22,signal="CN",no
     cat("install.packages(\"aroma.cn\")\n") 
     allpkg=FALSE
   }
-  #   else
-  #     cat("Package aroma.cn loaded.\n")
-  
-  
-  if(!suppressPackageStartupMessages(require(HDPenReg,quietly=TRUE) ) )
-  {
-    allpkg=FALSE
-    cat("The package HDPenReg is missing. You can install it with the following command:\n","install.packages(HDPenReg, repos=\"http://R-Forge.R-project.org\") \n")
-  }
-#   else
-#     cat("Package HDPenReg loaded.\n")
- 
-#   if(!suppressPackageStartupMessages(require(glmnet,quietly=TRUE) ) )
-#   {
-#     allpkg=FALSE
-#     cat("The package glmnet is missing. You can install it with the following command:\n","install.packages(glmnet) \n")
-#   }
-#   else
-#     cat("Package glmnet loaded.\n")
   
   if(!allpkg)
     stop("You have to install some packages : Follow the printed informations.")
@@ -92,9 +74,7 @@ markerSelection=function(dataSetName,dataResponse,chromosome=1:22,signal="CN",no
   if(!("totalAndFracBData"%in%list.files()))
     stop("There is no \"totalAndFracBData\", check if you are in the good working directory or if you have run the signalPreProcess function before.")
   
-  #signal
-  if(!(signal%in%c("CN","fracB","both")))
-    stop("signal must be either \"CN\", \"fracB\" or \"both\".")
+  
   #dataSetName
   if(!is.character(dataSetName))
     stop("dataSetName must be the name of a folder in rawData.")
@@ -113,10 +93,10 @@ markerSelection=function(dataSetName,dataResponse,chromosome=1:22,signal="CN",no
     stop("dataResponse does not contain the column \"files\".")
   if(!("response"%in%names(dataResponse)))
     stop("dataResponse does not contain the column \"names\".")
-    
+  
   #loss
-  if(!(loss%in%c("logistic","linear")))
-    stop("loss must be either \"logistic\" or \"linear\".")
+  #   if(!(loss%in%c("logistic","linear")))
+  #     stop("loss must be either \"logistic\" or \"linear\".")
   
   #chromosome : vector of integer between 1 and 25
   if( !is.numeric(chromosome) || !is.vector(chromosome) )
@@ -133,9 +113,9 @@ markerSelection=function(dataSetName,dataResponse,chromosome=1:22,signal="CN",no
   
   #launch the right function depending of the signal
   res=switch(signal,
-         "CN"=SNPselectionCNsignal(dataSetName,dataResponse,chromosome,normalTumorArray,onlySNP,nbFolds,loss,...),
-         "fracB"=SNPselectionFracBsignal(dataSetName,dataResponse,chromosome,normalTumorArray,nbFolds,loss,...),
-         "both"=stop("Not yet implemented."))
+             "CN"=SNPselectionCNsignal(dataSetName,dataResponse,chromosome,normalTumorArray,onlySNP,nbFolds,loss,plot,pkg,...),
+             "fracB"=SNPselectionFracBsignal(dataSetName,dataResponse,chromosome,normalTumorArray,nbFolds,loss,plot,pkg,...),
+             "both"=stop("Not yet implemented."))
   
   return(res)
 }
@@ -155,6 +135,7 @@ markerSelection=function(dataSetName,dataResponse,chromosome=1:22,signal="CN",no
 # @param nbFolds number of folds in the cross validation
 # @param loss either \"logistic\" (binary response) or \"linear\" (quantitative response).
 # @param plot if TRUE, plot the cross validation graphic
+# @param pkg Either "HDPenReg" or "spikeslab". Ued package in linear case.
 #
 # @return a list containing length(chromosme) elements. Each element is a list containing
 # \describe{
@@ -168,7 +149,7 @@ markerSelection=function(dataSetName,dataResponse,chromosome=1:22,signal="CN",no
 #
 # @author Quentin Grimonprez
 #
-SNPselectionCNsignal=function(dataSetName,dataResponse,chromosome,normalTumorArray,onlySNP,nbFolds=10,loss="logistic",plot=TRUE,...)
+SNPselectionCNsignal=function(dataSetName,dataResponse,chromosome,normalTumorArray,onlySNP,nbFolds=10,loss="logistic",plot=TRUE,pkg="HDPenReg",...)
 {
   res=list()
   for(chr in chromosome)
@@ -181,77 +162,22 @@ SNPselectionCNsignal=function(dataSetName,dataResponse,chromosome,normalTumorArr
     ind=sapply(names(C)[3:(ncol(C)-1)],FUN=function(x){match(x,dataResponse$files)})    
     if(sum(is.na(ind))!=0)
       stop(paste0("A response is missing for the following files : ",paste(C$sampleNames[is.na(ind)],collapse=", ")))      
-
+    
     response=dataResponse$response[ind]
-        
-    if(loss=="linear")
-    {
-      #cross validation to choose the best l1 norm ratio
-      rescv=HDcvlars(t(as.matrix(C[3:(ncol(C)-1)])), response, nbFolds,index = seq(0, 1, by = 0.01),...)
-      
-      if(plot)
-      {
-        plotCv(rescv)
-        title(paste0("chr",chr))
-      }
-      
-      #lars algorithm for obtaining all the path
-      reslars=HDlars(t(as.matrix(C[3:(ncol(C)-1)])), response,...) #ajouter critere d'arret sur la norme, le nb de variable ??
-      
-      #we compute the coefficients for the value given by the HDcvlars function
-      coeff=computeCoefficients(reslars,rescv$fraction,mode="fraction")
-      
-      
-      intercept=reslars@mu
-      if(length(coeff$variable)!=0)
-      {
-        index=order(coeff$variable)
-        var=coeff$variable[index]
-        pos=C$position[coeff$variable[index]]
-        name=as.character(C$featureNames)[coeff$variable[index]]
-        coef=coeff$coefficient[index]
-      }
-      else
-      {
-        pos=c()
-        var=c()
-        name=c()
-        coef=c()
-      }
-      rm(reslars,coeff)
-      gc()
-    }
-    else
-    {
-      if(loss=="logistic")
-      {
-        rescv=cv.glmnet(t(as.matrix(C[3:(ncol(C)-1)])), response, nfolds=nbFolds,family="binomial",...)
-        if(plot)
-        {
-          plot(rescv)
-          title(paste0("chr",chr))
-        }
-        coef=coef(rescv,s=rescv$lambda.min)
-        
-        ind=which(coeff!=0)
-        
-        var=ind[-1]-1
-        pos=C$position[var]
-        name=as.character(C$featureNames)[var]
-        intercept=coef[1]
-        coef=coef[var]
-      }
-    }
-        
-    res[[paste0("chr",chr)]]=list(chr=chr,markers.index=var,markers.position=pos,
-                                  markers.names=name,coefficient=coef,
-                                  intercept=intercept)
+    
+    nbFolds=min(nbFolds,length(response))
+    
+    restemp=variableSelection(t(as.matrix(C[,3:(ncol(C)-1)])),response,nbFolds,loss,plot,pkg,...)
+    
+    res[[paste0("chr",chr)]]=list(chr=chr,markers.index=restemp$markers.index,markers.position=C$position[restemp$markers.index],
+                                  markers.names=as.character(C$featureNames)[restemp$markers.index],coefficient=restemp$coefficient,
+                                  intercept=restemp$intercept)
     
     #delete objects created during this loop
-    rm(C,rescv,coef,pos,intercept,name,var)
+    rm(C,restemp)    
     gc()
   }
-
+  
   return(res)
 }
 
@@ -268,7 +194,8 @@ SNPselectionCNsignal=function(dataSetName,dataResponse,chromosome,normalTumorArr
 # @param onlySNP (only if signal=\"CN\"). If TRUE, only the SNP markers will be used.
 # @param nFolds number of folds in the cross validation
 # @param loss either \"logistic\" (binary response) or \"linear\" (quantitative response).
-# @param if TRUE, plot the cross validation graphic
+# @param plot if TRUE, plot the cross validation graphic
+# @param pkg Either "HDPenReg" or "spikeslab". Ued package in linear case.
 # 
 # @return a list containing length(chromosme) elements. Each element is a list containing
 # \describe{
@@ -281,7 +208,7 @@ SNPselectionCNsignal=function(dataSetName,dataResponse,chromosome,normalTumorArr
 #
 # @author Quentin Grimonprez
 #
-SNPselectionFracBsignal=function(dataSetName,dataResponse,chromosome,normalTumorArray,nbFolds=10,loss="logistic",plot=TRUE,...)
+SNPselectionFracBsignal=function(dataSetName,dataResponse,chromosome,normalTumorArray,nbFolds=10,loss="logistic",plot=TRUE,pkg="HDPenReg",...)
 {
   res=list()
   for(chr in chromosome)
@@ -293,83 +220,26 @@ SNPselectionFracBsignal=function(dataSetName,dataResponse,chromosome,normalTumor
     
     fracB=getFracBSignal(dataSetName,chr,normalTumorArray,listOfFiles=as.character(dataResponse$files),verbose=FALSE)
     
-
+    
     fracB=fracB[[paste0("chr",chr)]]$tumor
     gc()
     
     #extract the response in the right order
     ind=sapply(names(fracB)[3:(ncol(fracB)-1)],FUN=function(x){match(x,dataResponse$files)})    
     if(sum(is.na(ind))!=0)
-      #stop(paste0("A response is missing for the following files : ",paste(C$sampleNames[is.na(ind)],collapse=", ")))   
       stop(paste0("A response is missing for the following files : ",paste(fracB$sampleNames[is.na(ind)],collapse=", ")))
     
     response=dataResponse$response[ind]
-      
-    if(loss=="linear")
-    {
-      #cross validation to choose the best l1 norm ratio
-      rescv=HDcvlars(t(as.matrix(fracB[,3:(ncol(fracB)-1)])), response, nbFolds,index = seq(0, 1, by = 0.01),...)
-      
-      if(plot)
-      {
-        plotCv(rescv)
-        title(paste0("chr",chr))
-      }
-      
-      #lars algorithm for obtaining all the path
-      reslars=HDlars(t(as.matrix(fracB[,3:(ncol(fracB)-1)])), response,...) #ajouter critere d'arret sur la norme, le nb de variable ??
-      
-      #we compute the coefficients for the value given by the HDcvlars function
-      coeff=computeCoefficients(reslars,rescv$fraction,mode="fraction")      
-      
-
-      intercept=reslars@mu
-      if(length(coeff$variable)!=0)
-      {
-        index=sort(coeff$variable,index.return=TRUE)$ix
-        var=coeff$variable[index]
-        pos=fracB$position[coeff$variable[index]]
-        name=as.character(fracB$featureNames)[coeff$variable[index]]
-        coef=coeff$coefficient[index]
-      }
-      else
-      {
-        pos=c()
-        var=c()
-        name=c()
-        coef=c()
-      }
-      
-      rm(reslars,coeff)
-      gc()
-    }
-    else
-    {
-      if(loss=="logistic")
-      {
-        rescv=cv.glmnet(t(as.matrix(fracB[,3:(ncol(fracB)-1)])), response, nfolds=nbFolds,family="binomial",...)
-        if(plot)
-        {
-          plot(rescv)
-          title(paste0("chr",chr))
-        }
-        coef=coef(rescv,s=rescv$lambda.min)
-        
-        ind=which(coeff!=0)
-        
-        var=ind[-1]-1
-        pos=fracB$position[var]
-        name=as.character(fracB$featureNames)[var]
-        intercept=coef[1]
-        coef=coef[var]
-      }
-    }
     
-    res[[paste0("chr",chr)]]=list(chr=chr,markers.index=var,markers.position=pos,
-                                  markers.names=name,coefficient=coef,
-                                  intercept=intercept)
+    nbFolds=min(nbFolds,length(response))
     
-    rm(fracB,rescv,coef,pos,intercept,name,var)
+    restemp=variableSelection(t(as.matrix(fracB[,3:(ncol(fracB)-1)])),response,nbFolds,loss,plot,pkg,...)
+    
+    res[[paste0("chr",chr)]]=list(chr=chr,markers.index=restemp$markers.index,markers.position=fracB$position[restemp$markers.index],
+                                  markers.names=as.character(fracB$featureNames)[restemp$markers.index],coefficient=restemp$coefficient,
+                                  intercept=restemp$intercept)
+    
+    rm(fracB,restemp)
     gc()
   }
   
@@ -387,7 +257,8 @@ SNPselectionFracBsignal=function(dataSetName,dataResponse,chromosome,normalTumor
 #' @param nbFolds number of folds in the cross validation.
 #' @param loss either "logistic" (binary response) or "linear" (quantitative response).
 #' @param plot If TRUE plot cross-validation mean squared error (default=TRUE).
-#' @param ... spplementary arguments for cv.glmnet function in case of logistic loss or for HDlars function for linear loss.
+#' @param pkg Either "HDPenReg" or "spikeslab". Ued package in linear case.
+#' @param ... spplementary arguments for cv.glmnet function in case of logistic loss or for HDlars or spikeslab function for linear loss.
 #' 
 #' @return a list containing 
 #' \describe{
@@ -399,17 +270,10 @@ SNPselectionFracBsignal=function(dataSetName,dataResponse,chromosome,normalTumor
 #' @author Quentin Grimonprez
 #' 
 #' @export
-variableSelection=function(dataMatrix,dataResponse,nbFolds=min(length(dataResponse),10),loss="logistic",plot=TRUE,...)
+variableSelection=function(dataMatrix,dataResponse,nbFolds=min(length(dataResponse),10),loss=c("logistic","linear"),plot=TRUE,pkg=c("HDPenReg","spikeslab"),...)
 {
-  allpkg=TRUE
-  if(!require(HDPenReg,quietly=TRUE))
-  {
-    allpkg=FALSE
-    cat("The package changepoint is missing. You can install it with the following command:\n","install.packages(HDPenReg, repos=\"http://R-Forge.R-project.org\") \n")
-  }
-  
-  if(!allpkg)
-    stop("You have to install some packages : Follow the printed informations.")
+  loss <- match.arg(loss)
+  pkg <- match.arg(pkg)
   
   #check plot (other parameters will be checcked in HDcvlars function)
   if(!is.logical(plot))
@@ -417,32 +281,59 @@ variableSelection=function(dataMatrix,dataResponse,nbFolds=min(length(dataRespon
   
   if(loss=="linear")
   {
-    #cross validation to choose the best l1 norm ratio
-    rescv=HDcvlars(dataMatrix, dataResponse, nbFolds,index = seq(0, 1, by = 0.01),...)
-    
-    if(plot)
+    if(pkg=="HDPenReg")
     {
-      plotCv(rescv)
+      #lars algorithm for obtaining all the path
+      reslars=HDlars(dataMatrix, dataResponse,...)
+      
+      #cross validation to choose the best lambda
+      rescv=HDcvlars(dataMatrix, dataResponse, nbFolds,index = c(reslars@lambda,0), mode="lambda",...)
+      
+      if(plot)
+      {
+        plot(rescv)
+      }
+      
+      
+      
+      #we compute the coefficients for the value given by the HDcvlars function
+      #coeff=computeCoefficients(reslars,rescv$minIndex,mode="lambda")
+      
+      indKnee=Lmethod(rescv$cv)
+      #var=reslars@variable[[which.min(rescv$cv)]]
+      #coef=reslars@coefficient[[which.min(rescv$cv)]]
+      var=reslars@variable[[indKnee]]
+      coef=reslars@coefficient[[indKnee]]
+      #var=coeff$variable
+      #coef=coeff$coefficient
+      intercept=reslars@mu
+      if(length(var)!=0)
+      {
+        index=order(var)
+        var=var[index]
+        coef=coef[index]
+        #index=order(coeff$variable)
+        #var=coeff$variable[index]
+        #coef=coeff$coefficient[index]
+      }
+      
+      rm(reslars)
+      #rm(reslars,coeff)
+      gc()
     }
-    
-    #lars algorithm for obtaining all the path
-    reslars=HDlars(dataMatrix, dataResponse,...)
-    
-    #we compute the coefficients for the value given by the HDcvlars function
-    coeff=computeCoefficients(reslars,rescv$fraction,mode="fraction")
+    else
+    {
+      if(pkg=="spikeslab")
+      {
+        ################ spikeslab
+        #rescv=cv.spikeslab(x=dataMatrix, y=dataResponse, bigp.smalln = TRUE,K=nbFolds,... )
+        rescv=spikeslab(x=dataMatrix, y=dataResponse, bigp.smalln = TRUE,... )
         
-    var=coeff$variable
-    coef=coeff$coefficient
-    intercept=reslars@mu
-    if(length(coeff$variable)!=0)
-    {
-      index=order(coeff$variable)
-      var=coeff$variable[index]
-      coef=coeff$coefficient[index]
+        intercept=rescv$y.center #rescv$spikeslab.obj$y.center #si cv.spikeslab
+        var=which(rescv$gnet.scale!=0)
+        coef=rescv$gnet.scale[var]
+      }
     }
-
-    rm(reslars,coeff)
-    gc()
   }
   else
   {
@@ -455,16 +346,56 @@ variableSelection=function(dataMatrix,dataResponse,nbFolds=min(length(dataRespon
       }
       coef=coef(rescv,s=rescv$lambda.min)
       
-      ind=which(coeff!=0)
+      ind=which(coef!=0)
       
       var=ind[-1]-1
-      pos=C$position[var]
-      name=C$featureNames[var]
       intercept=coef[1]
-      coef=coef[var]
+      coef=coef[ind[-1]]
+      
+      names(var)=NULL
+      names(coef)=NULL
     }
   }
   
-
+  
   res=list(markers.index=var,coefficient=coef,intercept=intercept)  
+}
+
+
+#Determining the Number of Clusters/Segments in Hierarchical Clustering/Segmentation Algorithms
+#Stan Salvador and Philip Chan 
+#
+# This function searches the furthest point 
+#
+# @title Find a knee in a curve
+#
+# @param y ordiantes of the curve
+# @param x abscissas of the curve
+# @return index of the knee
+#
+knee=function(y,x=1:length(y))
+{
+  m=(y[length(y)]-y[1])/(x[length(x)]-x[1])
+  p=y[1]-m*x[1]
+  d=abs(m*x-y+p)/sqrt(2+m^2)
+  knee=which.max(d)
+  return(knee)
+}
+
+
+Lmethod=function(y,x=1:length(y))
+{
+  b=length(x)
+  lrmse=rrmse=rmse=rep(NA,b)
+  for(i in 2:(b-2))
+  {
+    l=lm(y[1:i]~x[1:i])
+    r=lm(y[(i+1):b]~x[(i+1):b])
+    lrmse[i]=sqrt(sum(l$residuals^2))
+    rrmse[i]=sqrt(sum(r$residuals^2))
+    
+    rmse[i]=(i-1)/(b-1)*lrmse[i]+(b-i)/(b-1)*rrmse[i]
+  }
+  
+  return(min(which.min(rmse)+1,b))
 }

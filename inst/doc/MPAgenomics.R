@@ -233,7 +233,7 @@
 
 
 ###################################################
-### code chunk number 26: MPAgenomics.Rnw:1257-1261 (eval = FALSE)
+### code chunk number 26: MPAgenomics.Rnw:1259-1263 (eval = FALSE)
 ###################################################
 ## dataResponse=data.frame(files=getListOfFiles("datatest1"),
 ## response=c(2.105092,1.442868,1.952103,1.857819,2.047897,1.654766,2.385327,2.113406))
@@ -242,7 +242,7 @@
 
 
 ###################################################
-### code chunk number 27: MPAgenomics.Rnw:1307-1310 (eval = FALSE)
+### code chunk number 27: MPAgenomics.Rnw:1311-1314 (eval = FALSE)
 ###################################################
 ## dataMatrix=matrix(rnorm(5000,0,0.5),nrow=50)
 ## dataResponse=drop(dataMatrix%*%sample(c(rep(0,90),rep(1,10))))

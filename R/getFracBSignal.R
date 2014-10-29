@@ -62,6 +62,10 @@ getFracBSignal=function(dataSetName,chromosome,normalTumorArray,listOfFiles=NULL
   if(!allpkg)
     stop("You have to install some packages : Follow the printed informations.")
 
+  require(aroma.core)
+  require(R.filesets)
+  require(R.methodsS3)
+  
   if(!("totalAndFracBData"%in%list.files()))
     stop("There is no \"totalAndFracBData\", check if you are in the good working directory or if you have run the signalPreProcess function before.")
   
@@ -114,14 +118,14 @@ getFracBSignal=function(dataSetName,chromosome,normalTumorArray,listOfFiles=NULL
   dataSetTumorBoost=paste0(dataSet,",TBN,NGC")
   
   #load fracB
-  ds <- AromaUnitFracBCnBinarySet$byName(dataSet, chipType="*", paths=rootPath);
+  ds <- aroma.core::AromaUnitFracBCnBinarySet$byName(dataSet, chipType="*", paths=rootPath);
   
   
   #check listOfFiles
   pos=c()
   if(is.null(listOfFiles) || missing(listOfFiles))
   {
-    listOfFiles=getNames(ds)
+    listOfFiles=R.filesets::getNames(ds)
     pos=1:length(ds)
   }
   else
@@ -132,7 +136,7 @@ getFracBSignal=function(dataSetName,chromosome,normalTumorArray,listOfFiles=NULL
     listOfFiles=unique(listOfFiles)
     
     #check if all the files of listOfFiles are in the folder
-    pos=sapply(listOfFiles,match,getNames(ds))#position of the files of listOfFiles in the folder
+    pos=sapply(listOfFiles,match,R.filesets::getNames(ds))#position of the files of listOfFiles in the folder
     if(length(which(pos>0))!=length(pos))
       stop("Wrong name of files in listOfFiles")
   } 
@@ -154,7 +158,7 @@ getFracBSignal=function(dataSetName,chromosome,normalTumorArray,listOfFiles=NULL
       stop("normalTumorArray doesn't contain a column \"normal\" or \"tumor\".\n")
     
     #check is the file contains all the file
-#     isArrayComplete=sapply(getNames(ds),FUN=function(name,listOfNames){name%in%listOfNames},c(as.character(normalTumorArray$normal),as.character(normalTumorArray$tumor)))
+#     isArrayComplete=sapply(R.filesets::getNames(ds),FUN=function(name,listOfNames){name%in%listOfNames},c(as.character(normalTumorArray$normal),as.character(normalTumorArray$tumor)))
 #     if(sum(isArrayComplete)!=length(isArrayComplete))
 #       stop("normalTumorArray doesn't contain all the filenames of dataSetName.")
     
@@ -187,14 +191,14 @@ getFracBSignal=function(dataSetName,chromosome,normalTumorArray,listOfFiles=NULL
   ####################
   
   #get names and psoition of the probes
-  ugp <- getAromaUgpFile(ds);
-  unf <- getUnitNamesFile(ugp);
+  ugp <- aroma.core::getAromaUgpFile(ds);
+  unf <- aroma.core::getUnitNamesFile(ugp);
   
   #get the prefix of SNP probes
-  platform <- getPlatform(ugp);
+  platform <- aroma.core::getPlatform(ugp);
   if (platform == "Affymetrix") 
   {
-    require("aroma.affymetrix") || throw("Package not loaded: aroma.affymetrix");
+    require("aroma.affymetrix") || R.methodsS3::throw("Package not loaded: aroma.affymetrix");
     snpPattern <- "^SNP|^S-";
   } 
   else if (platform == "Illumina") 
@@ -203,22 +207,22 @@ getFracBSignal=function(dataSetName,chromosome,normalTumorArray,listOfFiles=NULL
   }
   else 
   {
-    throw("Unknown platform: ", platform);
+    R.methodsS3::throw("Unknown platform: ", platform);
   }
   
   allFracB=list()
   for(chr in chromosome)
   {
-    units <- getUnitsOnChromosome(ugp, chromosome=chr);
+    units <- aroma.core::getUnitsOnChromosome(ugp, chromosome=chr);
   
-    unitNames <- getUnitNames(unf,units=units);##names of the probes
+    unitNames <- aroma.core::getUnitNames(unf,units=units);##names of the probes
 
       
     #keep the SNP units
     units=units[grep(snpPattern,unitNames)]
     unitNames=unitNames[grep(snpPattern,unitNames)]
   
-    posChr <- getPositions(ugp, units=units);#positions of the probes
+    posChr <- aroma.core::getPositions(ugp, units=units);#positions of the probes
     #sort signal by position
     indSort=order(posChr)
     
@@ -263,13 +267,14 @@ getFracBSignalSingleStudy=function(ds,units,indexOfFiles)
 {    
   require(aroma.affymetrix)
   require(aroma.cn)
+  require(R.filesets)
   
   #reduce to the files from indexOfFiles
   ds=extract(ds,indexOfFiles)
   
   #extract fracB for normal signal
-  fracBnormal <- extractMatrix(ds, units=units);
-  sampleNames=getNames(ds)
+  fracBnormal <- R.filesets::extractMatrix(ds, units=units);
+  sampleNames=R.filesets::getNames(ds)
   colnames(fracBnormal)=sampleNames
   
   return(list(tumor=fracBnormal,sampleNames=sampleNames))
@@ -293,36 +298,38 @@ getFracBSignalPairedStudy=function(ds,units,normalTumorArray,normalFiles)
 {  
   require(aroma.affymetrix)
   require(aroma.cn)
+  require(aroma.core)
+  require(R.filesets)
   
   #id of normal files
-  normalId=sapply(normalFiles,FUN=function(x,names){which(names==x)},getNames(ds))
+  normalId=sapply(normalFiles,FUN=function(x,names){which(names==x)},R.filesets::getNames(ds))
     
   # Extract selected normal files
   dsFracBnormal <- extract(ds, normalId);  
   
   #extract fracB for normal signal
-  fracBnormal <- extractMatrix(dsFracBnormal, units=units);
+  fracBnormal <- R.filesets::extractMatrix(dsFracBnormal, units=units);
   
   #folder for tumorboost
-  dataSet2=paste0(getFullName(ds),",TBN,NGC")
+  dataSet2=paste0(R.filesets::getFullName(ds),",TBN,NGC")
   rootPath <- "totalAndFracBData";
   rootPath <- Arguments$getReadablePath(rootPath);
-  dstumor<- AromaUnitFracBCnBinarySet$byName(dataSet2, chipType="*", paths=rootPath);
+  dstumor<- aroma.core::AromaUnitFracBCnBinarySet$byName(dataSet2, chipType="*", paths=rootPath);
   
   #names of tumor files
   tumorFiles=getComplementaryFile(normalFiles,normalTumorArray)
   
   #id of tumor files
-  tumorId=sapply(tumorFiles,FUN=function(x,names){which(names==x)},getNames(dstumor))
+  tumorId=sapply(tumorFiles,FUN=function(x,names){which(names==x)},R.filesets::getNames(dstumor))
 
   # Extract selected tumor files
   dsFracBtumor <- extract(dstumor, tumorId);  
   
   #extract fracB for tumor signal
-  fracBtumor <- extractMatrix(dsFracBtumor, units=units);
+  fracBtumor <- R.filesets::extractMatrix(dsFracBtumor, units=units);
   
-  sampleNamesN=getNames(dsFracBnormal)
-  sampleNamesT=getNames(dsFracBtumor)
+  sampleNamesN=R.filesets::getNames(dsFracBnormal)
+  sampleNamesT=R.filesets::getNames(dsFracBtumor)
 
   colnames(fracBnormal)=sampleNamesN
   colnames(fracBtumor)=sampleNamesT

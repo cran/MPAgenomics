@@ -12,6 +12,10 @@
 tumorboost<-function(dataSetName,normalTumorArray,plot=TRUE)
 {
   require(aroma.cn)
+  require(aroma.core)
+  require(R.devices)
+  require(R.filesets)
+  
   log <- verbose <- Arguments$getVerbose(-1, timestamp=TRUE);
   rootPath <- "totalAndFracBData";
   rootPath <- Arguments$getReadablePath(rootPath);
@@ -23,20 +27,20 @@ tumorboost<-function(dataSetName,normalTumorArray,plot=TRUE)
   ######################################################
   
   ##########  fraction allele B
-  ds <- AromaUnitFracBCnBinarySet$byName(dataSet, chipType="*", paths=rootPath);
+  ds <- aroma.core::AromaUnitFracBCnBinarySet$byName(dataSet, chipType="*", paths=rootPath);
     
   # Identify all sample names by extracting all unique arrays name (ignoring tags)
-  #sampleNAMES = getId(getNames(ds),normalTumorArray) 
-  normalTumorMatrix=getNormalTumorMatrix(getNames(ds),normalTumorArray)
+  #sampleNAMES = getId(R.filesets::getNames(ds),normalTumorArray) 
+  normalTumorMatrix=getNormalTumorMatrix(R.filesets::getNames(ds),normalTumorArray)
   #uniqueNAMES <- sort(unique(sampleNAMES))
   
   ########## import total copy number
   if(plot)
   {
-    dsC <- AromaUnitTotalCnBinarySet$byName(dataSet, chipType="*", paths=rootPath);
+    dsC <- aroma.core::AromaUnitTotalCnBinarySet$byName(dataSet, chipType="*", paths=rootPath);
     #print(dsC);
-    #sampleNAMESC <-getId(getNames(dsC),normalTumorArray);
-    normalTumorMatrixC=getNormalTumorMatrix(getNames(dsC),normalTumorArray)
+    #sampleNAMESC <-getId(R.filesets::getNames(dsC),normalTumorArray);
+    normalTumorMatrixC=getNormalTumorMatrix(R.filesets::getNames(dsC),normalTumorArray)
   }
   
   ##########  genotypage
@@ -46,10 +50,10 @@ tumorboost<-function(dataSetName,normalTumorArray,plot=TRUE)
   rootPath <- Arguments$getReadablePath(rootPath);
   
   genotypeTag <- "NGC";
-  gsN <- AromaUnitGenotypeCallSet$byName(dataSet, tags=genotypeTag, chipType="*");
+  gsN <- aroma.core::AromaUnitGenotypeCallSet$byName(dataSet, tags=genotypeTag, chipType="*");
   
   # Keep only normal genotype files (not needed here, but could be needed in other situations)
-  #types <- getStatus(getNames(gsN),normalTumorArray)
+  #types <- getStatus(R.filesets::getNames(gsN),normalTumorArray)
   
   #keep <- which(is.element(types, c("normal")));
   #gsN <- extract(gsN, normalSample);
@@ -71,7 +75,7 @@ tumorboost<-function(dataSetName,normalTumorArray,plot=TRUE)
     stopifnot(length(pair) == 2);
       
     # Order as (tumor,normal)
-    types <- getStatus(getNames(extract(ds,pair)),normalTumorArray)
+    types <- getStatus(R.filesets::getNames(extract(ds,pair)),normalTumorArray)
 
     if(which(types=="normal")==1)
       o=2:1
@@ -90,7 +94,7 @@ tumorboost<-function(dataSetName,normalTumorArray,plot=TRUE)
 
       
     ########## genotypage of normalSample
-    gcN <- extract(gsN,which(gsN$Names==getNames(dsC)[normalSample]))
+    gcN <- extract(gsN,which(gsN$Names==R.filesets::getNames(dsC)[normalSample]))
     #gcN2 <- extract(gsN,normalSample)
     
       
@@ -105,20 +109,20 @@ tumorboost<-function(dataSetName,normalTumorArray,plot=TRUE)
 
     #print(dsList);
       
-    #dummy <- lapply(dsList, FUN=function(ds) print(getFile(ds,1)));
+    #dummy <- lapply(dsList, FUN=function(ds) print(R.filesets::getFile(ds,1)));
       
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     # Normalize allele B fractions for tumors given matched normals
     # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-    tbn <- TumorBoostNormalization(dsList$tumor, dsList$normal, gcN=dsList$callsN, tags=c("*", "NGC"));
-    dsTN <- process(tbn, verbose=log);
+    tbn <- aroma.cn::TumorBoostNormalization(dsList$tumor, dsList$normal, gcN=dsList$callsN, tags=c("*", "NGC"));
+    dsTN <- aroma.core::process(tbn, verbose=log);
     #print(dsTN);
 
     #if the user wants the different plot
     if(plot)
     {    
-      #id <- getId(getNames(dsTN),normalTumorArray)
-      dsTN=extract(dsTN,which(dsTN$Names==getNames(dsC[tumorSample])))
+      #id <- getId(R.filesets::getNames(dsTN),normalTumorArray)
+      dsTN=extract(dsTN,which(dsTN$Names==R.filesets::getNames(dsC[tumorSample])))
       
       # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
       # Create a list of matched data sets
@@ -153,13 +157,19 @@ tumorboost<-function(dataSetName,normalTumorArray,plot=TRUE)
 #
 tumorboostPlot=function(ds,dsList,dataSetName,normalTumorArray,tumorSample,normalSample,dsC,normalTumorMatrixC)
 {
+  require(aroma.affymetrix)
+  require(aroma.core)
+  require(R.filesets)
+  require(R.methodsS3)
+  require(R.oo)
+  
   ########## load the total copy number signal for a pair (normal,tumor) 
   pairC <- normalTumorMatrixC[normalTumorMatrixC[,2]==tumorSample,]
     
   stopifnot(length(pairC) == 2);
     
   # Order as (tumor,normal)
-  types <- getStatus(getNames(extract(dsC,pairC)),normalTumorArray)
+  types <- getStatus(R.filesets::getNames(extract(dsC,pairC)),normalTumorArray)
     
   if(which(types=="normal")==1)
     o=2:1
@@ -176,20 +186,20 @@ tumorboostPlot=function(ds,dsList,dataSetName,normalTumorArray,tumorSample,norma
   ##########
   #path for save the plot
   figPath <- Arguments$getWritablePath(paste0("figures/",dataSetName,"/signal/"));
-  siteTag <- getTags(ds);
+  siteTag <- R.filesets::getTags(ds);
   siteTag <- paste(siteTag[-1], collapse=","); 
   
   #
-  ugp <- getAromaUgpFile(dsList$tumor);
-  unf <- getUnitNamesFile(ugp);
+  ugp <- aroma.core::getAromaUgpFile(dsList$tumor);
+  unf <- aroma.core::getUnitNamesFile(ugp);
   
-  hg=getTags(ugp)[grep("hg",getTags(ugp))] #human genome reference 
+  hg=R.filesets::getTags(ugp)[grep("hg",R.filesets::getTags(ugp))] #human genome reference 
   
   # prefix of SNP
-  platform <- getPlatform(ugp);
+  platform <- aroma.core::getPlatform(ugp);
   if (platform == "Affymetrix") 
   {
-    require("aroma.affymetrix") || throw("Package not loaded: aroma.affymetrix");
+    require("aroma.affymetrix") || R.methodsS3::throw("Package not loaded: aroma.affymetrix");
     snpPattern <- "^SNP|^S-";
   } 
   else if (platform == "Illumina") 
@@ -198,13 +208,13 @@ tumorboostPlot=function(ds,dsList,dataSetName,normalTumorArray,tumorSample,norma
   } 
   else 
   { 
-    throw("Unknown platform: ", platform);
+    R.methodsS3::throw("Unknown platform: ", platform);
   }
   
-  cat("Saving graphics for sample ",getNames(dsC[tumorSample]),"\n")
+  cat("Saving graphics for sample ",R.filesets::getNames(dsC[tumorSample]),"\n")
   
   #find ploidy for chromosome 23 and 24
-  gender=findGender(getName(dsC),normalSample,ugp)
+  gender=findGender(R.oo::getName(dsC),normalSample,ugp)
   
   #loop on chr
   for(chromosome in 1:25)
@@ -212,13 +222,13 @@ tumorboostPlot=function(ds,dsList,dataSetName,normalTumorArray,tumorSample,norma
     chrTag <- sprintf("Chr%02d", chromosome);
 
     #check for the existence of the file
-    figName <- sprintf("%s,%s", getNames(dsC[tumorSample]), chrTag);
+    figName <- sprintf("%s,%s", R.filesets::getNames(dsC[tumorSample]), chrTag);
     pathname <- filePath(figPath, sprintf("%s.png", figName));
     
     
-    units <- getUnitsOnChromosome(ugp, chromosome=chromosome);
-    unitNames <- getUnitNames(unf,units=units);##names of the SNP and CN probes
-    posChr <- getPositions(ugp, units=units);#position of the probes on the chromosome
+    units <- aroma.core::getUnitsOnChromosome(ugp, chromosome=chromosome);
+    unitNames <- aroma.core::getUnitNames(unf,units=units);##names of the SNP and CN probes
+    posChr <- aroma.core::getPositions(ugp, units=units);#position of the probes on the chromosome
     
     ##########################################################
     ################  FRACTION ALLELE B  #####################
@@ -226,12 +236,12 @@ tumorboostPlot=function(ds,dsList,dataSetName,normalTumorArray,tumorSample,norma
     # Identify SNP units
     keep <- (regexpr(snpPattern, unitNames) != -1);
     SNPunits <- units[keep];
-    posSNP <- getPositions(ugp, units=SNPunits);#position des SNPs sur le chromosome      
+    posSNP <- aroma.core::getPositions(ugp, units=SNPunits);#position des SNPs sur le chromosome      
     
     
     # Extract Allele B fractions (defined only for SNP probes)
     kk <- 1;
-    dfList <- lapply(dsList, FUN=getFile, kk);
+    dfList <- lapply(dsList, FUN=R.filesets::getFile, kk);
     beta <- lapply(dfList, FUN=function(df) df[SNPunits,1,drop=TRUE]);
     beta <- as.data.frame(beta);
     beta <- as.matrix(beta);
@@ -244,7 +254,7 @@ tumorboostPlot=function(ds,dsList,dataSetName,normalTumorArray,tumorSample,norma
     ##########################################################
     
     #tumor CN
-    C <- extractMatrix(dsPairC, units=units);
+    C <- R.filesets::extractMatrix(dsPairC, units=units);
     
     #the ploidy depends of the gender for the cromosome 23 and 24
     if(chromosome==23 || chromosome==24)
@@ -281,14 +291,14 @@ tumorboostPlot=function(ds,dsList,dataSetName,normalTumorArray,tumorSample,norma
     ylab <- "Copy number";
     
     # Plot total CNs
-    fig <- devNew("png", pathname, label=figName, width=width, height=4*aspect*width);
+    fig <- R.devices::devNew("png", pathname, label=figName, width=width, height=4*aspect*width);
     par(mfrow=c(4,1))
     par(mar=c(2.7,2.5,1.1,1)+0.1, tcl=-0.3, mgp=c(1.4,0.4,0), cex=2);
     plot(NA, xlim=xlim, ylim=ylim, xlab=xlab, ylab=ylab, axes=FALSE);
     axis(side=1);
     axis(side=2, at=c(0,2,4,6));
     points(x, C, pch=".");
-    label <- sprintf("%s", getNames(dsC[tumorSample]));
+    label <- sprintf("%s", R.filesets::getNames(dsC[tumorSample]));
     stext(side=3, pos=0, label);
     stext(side=3, pos=1, chrTag);
     
@@ -309,11 +319,11 @@ tumorboostPlot=function(ds,dsList,dataSetName,normalTumorArray,tumorSample,norma
       axis(side=1);
       axis(side=2, at=c(0,1/2,1));
       points(x, beta[,cc], pch=".", col=cols);
-      label <- sprintf("%s (%s)", getNames(dsC[tumorSample]), name);
+      label <- sprintf("%s (%s)", R.filesets::getNames(dsC[tumorSample]), name);
       stext(side=3, pos=0, label);
       stext(side=3, pos=1, chrTag); 
     }
-    devDone();
+    R.devices::devDone();
     cat("*")
     
     

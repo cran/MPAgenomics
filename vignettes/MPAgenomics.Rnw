@@ -108,7 +108,7 @@ install.packages("aroma.cn")
 	
 			The example is based on a free data-set containing 8 .CEL files (251Mo) which can be downloaded from the Broad Institute website, following this link:
 			\url{http://www.broadinstitute.org/mpg/birdsuite/downloads/birdsuite_inputs_1.5.3.tgz}
-			If you are used to decompress .tgz files, extract this file and copy the following command in the R console, replacing the path to the directory where the raw data (.CEL files) are stored with the appropriate one. Note that we deliberately use "/" and not "$\backslash$ " in \texttt{celPATH}. If you copy paste paths from Windows (e.g. looking at properties of the directory), you must change "$\backslash$ " by "/" or "$\backslash\backslash$ ".
+			If you are used to decompress .tgz files, extract this file and copy the following command in the R console, replacing the path to the directory where the raw data (.CEL files) are stored with the appropriate one. Note that we deliberately use ``/'' and not ``$\backslash$'' in \texttt{celPATH}. If you copy paste paths from Windows (e.g. looking at properties of the directory), you must change ``$\backslash$'' by ``/'' or ``$\backslash\backslash$''.
 	
 <<eval=FALSE>>=
 celPATH="/home/user/Documents/workdir/CELdata/cel"
@@ -237,7 +237,7 @@ dataSetPath=celPATH,chipFilesPath=chipPATH, path=".",
 createArchitecture=TRUE, savePlot=TRUE, tags="Full")
 @	
 	
-			The first pipeline offered in \texttt{MPAgenomics} consists in the segmentation of every copy-number profile of the data. Then, a calling method can be applied on all the segments to label them (e.g. "loss", "normal", "gain"). To perform segmentation and calling at the same time, type the following lines in your R console:
+			The first pipeline offered in \texttt{MPAgenomics} consists in the segmentation of every copy-number profile of the data. Then, a calling method can be applied on all the segments to label them (e.g. ``loss'', ``normal'', ``gain''). To perform segmentation and calling at the same time, type the following lines in your R console:
 
 <<eval=FALSE>>=
 segcall=cnSegCallingProcess("datatest1",chromosome=c(1,5),method="PELT")
@@ -289,7 +289,7 @@ normalTumorArray=data.frame(normal=rep(files[1],7),tumor=files[2:8])
 				Note that the extension .CEL is not provided in the \texttt{normalTumorArray} dataframe.
 				In the following of the vignette, a study which provides both control and tumoral samples will be refered as a normal-tumor study.
 				
-				A new normalization can be run by taking into account information from the control sample. To separate analyses with or without control samples, we will store results from this normal-tumor study under the name "datatest2". As the architecture has already been created for "datatest1", it is not necessary to run \texttt{signalPreProcess} with \mbox{\texttt{createArchitecture=TRUE}}. It is faster to add the CEL files in "datatest2" while leaving the chip definition files as they are by using the function \texttt{addData} and then \texttt{signalPreProcess} with \mbox{\texttt{createArchitecture=FALSE}}.
+				A new normalization can be run by taking into account information from the control sample. To separate analyses with or without control samples, we will store results from this normal-tumor study under the name ``datatest2''. As the architecture has already been created for ``datatest1'', it is not necessary to run \texttt{signalPreProcess} with \mbox{\texttt{createArchitecture=TRUE}}. It is faster to add the CEL files in ``datatest2'' while leaving the chip definition files as they are by using the function \texttt{addData} and then \texttt{signalPreProcess} with \mbox{\texttt{createArchitecture=FALSE}}.
 
 <<eval=FALSE>>=
 addData(dataSetName="datatest2",dataPath=celPATH,chipType="GenomeWideSNP_6")
@@ -353,7 +353,7 @@ segfracB
 				\texttt{chipType} & The name of the used chip.\\
 				\texttt{dataSetPath} &  Path to the folder containing the data CEL files.\\
 				\texttt{chipFilesPath} & Path to the folder containing the chip files.\\
-				\texttt{path} & Path where the architecture should be created (default=".").\\
+				\texttt{path} & Path where the architecture should be created (default=``.'').\\
 				\texttt{verbose} & Print information during the process (default=FALSE).\\
         \texttt{tags} & Common tag which appears in the different file names (cdf, ugp, ufl) of the chip. \\
         ~~ & For no tag, use tags=NULL (default = NULL).\\
@@ -378,7 +378,7 @@ segfracB
 			\label{datafileSingle2}
 		\end{figure}
 		
-		The \texttt{celPATH} and \texttt{chipPATH} variables contain the different paths to the downloaded files. The following command enables to both create the architecture and add the previous dataset under the name "datatest1".
+		The \texttt{celPATH} and \texttt{chipPATH} variables contain the different paths to the downloaded files. The following command enables to both create the architecture and add the previous dataset under the name ``datatest1''.
 <<eval=FALSE>>=
 createArchitecture("datatest1","GenomeWideSNP_6",celPATH,chipPATH,".",TRUE,"Full")
 @
@@ -522,7 +522,7 @@ createArchitecture("datatest1","GenomeWideSNP_6",celPATH,chipPATH,".",TRUE,"Full
 				Parameters & Description\\
 				\hline
 				\texttt{dataSetName} & The name of the data-set.\\
-				\texttt{chipType} & The type of the used chip (e.g. "GenomeWideSNP\_6").\\
+				\texttt{chipType} & The type of the used chip (e.g. ``GenomeWideSNP\_6'').\\
 				\texttt{normalTumorArray} & Only in the case of normal-tumor study. A csv file or a data.frame\\
 				~~ & containing the mapping between normal and tumor files(Fig. \ref{normalTumorArray}).\\
 				\texttt{dataSetPath} & Only if \texttt{createArchitecture=TRUE}.\\
@@ -530,7 +530,7 @@ createArchitecture("datatest1","GenomeWideSNP_6",celPATH,chipPATH,".",TRUE,"Full
 				\texttt{chipFilesPath} & Only if \texttt{createArchitecture=TRUE}.\\
 				~~ & Path to the folder containing all the annotations files for the specified chip type.\\
 				\texttt{path} & Only if \texttt{createArchitecture=TRUE}.\\
-				~~ & Path where the architecture should be created (default=".").\\
+				~~ & Path where the architecture should be created (default=``.'').\\
 				\texttt{createArchitecture} & if TRUE, the aroma architecture will be automatically created (default=TRUE).\\
 				\texttt{savePlot} & if TRUE, graphics of the CN signal and allele B fraction signal will be\\
 				~~ & saved in the \texttt{figures/signal} folder. (default=TRUE).\\
@@ -739,15 +739,15 @@ savePlot=TRUE,method="cghseg")
 				\texttt{normalTumorArray} & Only in the case of normal-tumor study. A csv file or a data.frame\\
 				~~ & containing the mapping between normal and tumor files(Fig. \ref{normalTumorArray}).\\
 				\texttt{chromosome} & A vector with the chromosomes to be segmented.\\
-				\texttt{Rho} & Only for method="PELT", a vector containing all the penalization values to test \\
+				\texttt{Rho} & Only for method=``PELT'', a vector containing all the penalization values to test \\
 				~ &  for the segmentation. If no values are provided, default values will be used.\\
-        \texttt{Kmax} & Only for method="cghseg", maximal number of segments.\\
+        \texttt{Kmax} & Only for method=``cghseg'', maximal number of segments.\\
 				\texttt{onlySNP} & If TRUE, only the copy-number for SNPs positions will be returned (default=TRUE).\\
 				\texttt{listOfFiles} & A vector containing the names of the files in dataSetName folder for which\\
 				~ & the copy number profiles  will be segmented (default is all the files).\\
 				\texttt{savePlot} & if TRUE, graphics of the segmented CN signal will be\\
 				~~ & saved in the \texttt{figures/dataSetName/segmentation/CN} folder. (default=TRUE).\\
-				\texttt{method} & "PELT" or "cghseg". (default="cghseg").\\
+				\texttt{method} & ``PELT'' or ``cghseg''. (default=``cghseg'').\\
 				\hline
 			\end{tabular}		
 		\end{center}
@@ -814,9 +814,9 @@ savePlot=TRUE,verbose=TRUE,method="cghseg")
 				\texttt{normalTumorArray} & A csv file or a data.frame\\
 				~~ & containing the mapping between normal and tumor files(Fig. \ref{normalTumorArray}).\\
 				\texttt{chromosome} & A vector with the chromosomes to be segmented.\\
-  			\texttt{Rho} & Only for method="PELT", a vector containing all the penalization values to test\\
+  			\texttt{Rho} & Only for method=``PELT'', a vector containing all the penalization values to test\\
 				~ &  for the segmentation. If no values are provided, default values will be used.\\
-        \texttt{Kmax} & Only for method="cghseg", maximal number of segments.\\
+        \texttt{Kmax} & Only for method=``cghseg'', maximal number of segments.\\
 				\texttt{listOfFiles} & A vector containing the names of the files in dataSetName folder for which\\
 				~ & the allele B profile is segmented (default is all the files).\\
 				\texttt{savePlot} & if TRUE, graphics of the segmented allele B profile will be\\
@@ -850,13 +850,13 @@ savePlot=TRUE,verbose=TRUE,method="cghseg")
 				Parameters & Description\\
 				\hline
 				\texttt{signal} & A vector containing the signal.\\
-    		\texttt{Rho} & Only for method="PELT", a vector containing all the penalization values to test\\
+    		\texttt{Rho} & Only for method=``PELT'', a vector containing all the penalization values to test\\
 				~ & for the segmentation. If no values are provided, default values will be used.\\
-        \texttt{Kmax} & Only for method="cghseg", maximal number of segments.\\
+        \texttt{Kmax} & Only for method=``cghseg'', maximal number of segments.\\
 				\texttt{position} & A vector containing the position of all elements of the signal (not necessary).\\
 				\texttt{plot} & If TRUE, plot some graphics (default=TRUE	).\\
 				\texttt{verbose} & If TRUE, print some information (default=TRUE).\\
-        \texttt{method} & "PELT" or "cghseg". (default="cghseg").\\
+        \texttt{method} & ``PELT'' or ``cghseg''. (default=``cghseg'').\\
 				\hline	
 			\end{tabular}		
 		\end{center}
@@ -983,9 +983,9 @@ seg$segment
 			\texttt{normalTumorArray} & Only in the case of normal-tumor study. A csv file or a data.frame\\
 			~ & containing the mapping between normal and tumor files(Fig. \ref{normalTumorArray}).\\
 			\texttt{chromosome} & A vector containing the chromosome to segment.\\
-  		\texttt{Rho} & Only for method="PELT", a vector containing all the penalization values to test \\
+  		\texttt{Rho} & Only for method=``PELT'', a vector containing all the penalization values to test \\
 			~ &  for the segmentation. If no values are provided, default values will be used.\\
-      \texttt{Kmax} & Only for method="cghseg", maximal number of segments.\\
+      \texttt{Kmax} & Only for method=``cghseg'', maximal number of segments.\\
 			\texttt{listOfFiles} & A vector containing the file names from the dataSetName to use.\\
 			\texttt{onlySNP} & If TRUE, only the SNP probes will be used.\\
 			\texttt{savePlot} & If TRUE, print some graphics (default=TRUE).\\
@@ -993,7 +993,7 @@ seg$segment
 			~ &   4 (including amplifications), 5 (including double deletions) (default=3).\\
 			\texttt{cellularity} &  Percentage of tumor cells in the sample (default=1).\\
 			\texttt{\dots} & Other parameters for the CGHcall function \cite{CGHcallR}.\\
-      \texttt{method} & "PELT" or "cghseg". (default="cghseg").\\
+      \texttt{method} & ``PELT'' or ``cghseg''. (default=``cghseg'').\\
 			\hline
 		\end{tabular}
 
@@ -1008,7 +1008,7 @@ seg$segment
 			\item \textbf{chromEnd} The ending position (in bp) of the segment. This position is included in the segment.
 			\item \textbf{probes} Number of probes in the segment.
 			\item \textbf{means} Mean of the segment.
-			\item \textbf{calls} The calling of the segment ("double loss", "loss", "normal", "gain" or "amplification").
+			\item \textbf{calls} The calling of the segment (``double loss'', ``loss'', ``normal'', ``gain'' or ``amplification'').
 		\end{itemize}
 			
 		The graphic of the segmented profile is saved in the \texttt{figures} folder of the architecture.
@@ -1041,8 +1041,8 @@ seg2=cnSegCallingProcess("datatest1",chromosome=21:22,method="PELT")
 				Parameters & Description\\
 				\hline
 				\texttt{segmentData} & A list (see details below).\\
-				\texttt{nclass} & Number of labels. 3 corresponds to "loss", "normal" and "gain", \\
-				~ & 4 adds "amplification" and 5 adds "double loss".\\
+				\texttt{nclass} & Number of labels. 3 corresponds to ``loss'', ``normal'' and ``gain'', \\
+				~ & 4 adds ``amplification'' and 5 adds ``double loss''.\\
 				\texttt{cellularity} & Percentage of tumor cells in the sample (default=1).\\
 				\texttt{verbose} & If TRUE, print some information.\\
 				\texttt{\dots} & Others parameters for CGHcall function \cite{CGHcallR}.\\
@@ -1138,7 +1138,7 @@ call$segment
 				Arguments & Description\\
 				\hline
 				\texttt{segmentList} & A data.frame containing a description of segments, it must have at least columns:\\
-				~ & "chromStart", "chromEnd", "probes" and "calls" (see the output of\\
+				~ & ``chromStart'', ``chromEnd'', ``probes'' and ``calls'' (see the output of\\
 				~ & \texttt{cnSegLabelProcess} and \texttt{callingProcess} functions).\\
 				\texttt{minLength} & The minimum length (in bp) for a segment. All the shorter segments are removed.\\
 				\texttt{minProbes} & The minimum number of probes for a segment.\\
@@ -1191,8 +1191,9 @@ with $(X\beta)_{i}=\sum_p x_{i,p}\beta_p$ and $\lambda>0$ controlling the number
 %
 After minimization, non-zero coefficients $\beta_p$ correspond to influential positions to predict the response. \\
 	
-	To solve this problem, we use the LARS algorithm \cite{lars} that solves the lasso problem for all the values of $\lambda$. In order to choose the best solution, we use a cross validation to select the best values of $\lambda$ and return the associated solution.\\
-	
+	To solve this problem, we use by default the LARS algorithm \cite{lars} that solves the lasso problem for all the values of $\lambda$. In order to choose the best solution, we use a cross validation to select the best values of $\lambda$ and return the associated solution.\\
+  
+  The spike and slab method \cite{spikeslab1}\cite{spikeslab2} is another alternative in this case of linear regression. It is a three steps procedure including filtering, marker effect estimation and marker selection steps. The filter and marker effect estimation steps use the spike and slab algorithm whereas the marker selection step relies on the elastic net (mixing a $l_1$ penalty whit a $l_2$ penalty). The spike and slab algorithm solves a generalized ridge regression problem ($l_2$ penalty). It is implemented in the R package \texttt{spikeslab} \cite{spikeslabR}. 
 	
 	\subsection{From data normalized by aroma}	
 
@@ -1200,7 +1201,7 @@ After minimization, non-zero coefficients $\beta_p$ correspond to influential po
 	
 		\begin{verbatim}
 markerSelection(dataSetName,dataResponse,chromosome,signal,normalTumorArray,onlySNP,nbFolds,
-loss,plot,...)
+loss,plot,pkg,...)
 		\end{verbatim}
 	
 	
@@ -1210,17 +1211,18 @@ loss,plot,...)
 				Parameters & Description\\
 				\hline
 				\texttt{dataSetName} & The name of the data-set folder.\\
-				\texttt{dataResponse} & A csv files or a data.frame with 2 columns: "files" and "response".\\
-				~ & The column "files" contains the filename to extract and\\
+				\texttt{dataResponse} & A csv files or a data.frame with 2 columns: ``files'' and ``response''.\\
+				~ & The column ``files'' contains the filename to extract and\\
 				~ &   the second column the response associated with the file.\\
 				\texttt{chromosome} & A vector containing the number of the chromosomes for the SNPs selection.\\
-				\texttt{signal} & "CN" or "fracB", corresponding to which signal will be analyzed (default="CN").\\
+				\texttt{signal} & ``CN'' or ``fracB'', corresponding to which signal will be analyzed (default=``CN'').\\
 				\texttt{normalTumorArray} & Only in the case of normal-tumor study. A csv file or a data.frame\\
 			~~ & containing the mapping between normal and tumor files(Fig. \ref{normalTumorArray}).\\
 				\texttt{onlySNP} & Only if \texttt{signal="CN"}. If TRUE, only the SNPs probes are used (default=FALSE).\\
 				\texttt{nbFolds} & Number of folds for the cross-validation (default=10).\\
-				\texttt{loss}  & either "logistic" (binary response) or "linear" (quantitative response), default is "logistic".\\
+				\texttt{loss}  & either ``logistic'' (binary response) or ``linear'' (quantitative response), default is ``logistic''.\\
 				\texttt{plot} & If TRUE, cross-validation mean squared error is plotted (default=TRUE).\\
+        \texttt{pkg} & Either ``HDPenReg'' or ``spikeslab''. Used package in linear case (default=``HDPenReg'').\\
 				\texttt{...} & supplementary arguments for \texttt{cv.glmnet} function \cite{glmnet} in case of \\
 				~ & logistic loss or for \texttt{HDlars} function for linear loss.\\
 				\hline	
@@ -1276,7 +1278,7 @@ onlySNP=TRUE,loss="linear")
 		A version of the selection of markers without the aroma architecture is available:
 		
 		\begin{verbatim}
-			variableSelection(dataMatrix,dataResponse,nbFolds,plot)
+			variableSelection(dataMatrix,dataResponse,nbFolds,loss,plot,pkg)
 		\end{verbatim}
 		
 		\begin{center}
@@ -1286,8 +1288,10 @@ onlySNP=TRUE,loss="linear")
 				\hline
 				\texttt{dataMatrix} & A matrix containing the data, each row is a different signal.\\
 				\texttt{dataResponse} & A vector containing the response associated with each signal.\\
-				\texttt{nbFolds} & Number of folds for the cross-validation (default=10).\\							\texttt{loss}  & either "logistic" (binary response) or "linear" (quantitative response), default is "logistic".\\
+				\texttt{nbFolds} & Number of folds for the cross-validation (default=10).\\							
+        \texttt{loss}  & either ``logistic'' (binary response) or ``linear'' (quantitative response), default is ``logistic''.\\
 				\texttt{plot} & If TRUE plot cross-validation mean squared error (default=TRUE).\\
+        \texttt{pkg} & Either ``HDPenReg'' or ``spikeslab''. Used package in linear case (default=``HDPenReg'').\\
 				\texttt{...} & supplementary arguments for \texttt{cv.glmnet} function \cite{glmnet} in case of \\
 				~ & logistic loss or for \texttt{HDlars} function for linear loss.\\
 				\hline	
@@ -1309,6 +1313,31 @@ dataMatrix=matrix(rnorm(5000,0,0.5),nrow=50)
 dataResponse=drop(dataMatrix%*%sample(c(rep(0,90),rep(1,10))))
 res=variableSelection(dataMatrix,dataResponse,nbFolds=5,loss="linear",plot=TRUE)
 @		
+
+  \subsection{To go further}
+    In the current implementation of the \texttt{MPAgenomics} R package, two variable selection methods are proposed: $(i)$ the Spike and Slab strategy consisting in first filtering variables to keep most reliable ones, second estimating the effect of remaining variables, and third selecting variables (using AIC), or $(ii)$ Lasso + 10-fold cross validation and elbow search \cite{coude} to choose the unknown parameter $\lambda$ (default choice).\\
+  
+    In order to compare the two approaches, we have carried out a small simulation study that is shortly described in what follows and mainly summarized by Figure \ref{fig:truefalse}. We run the two approaches with 100 samples generated according to the following design: 
+  \begin{itemize}
+		\item $I=100$ individuals and $P=1000, 2000,\dots, 10000$ variables
+		\item $\beta^* \in \mathbb{R}^p$, the true sparse estimates with only $K=10$ non-zero coefficients
+		\item $X\in \mathcal{M}_{I,P}(\mathbb{R})$, $X_1,\dots,X_I \sim \mathcal{N}(0_P,I_P)$
+		\item $\epsilon\in\mathbb{R}^P$ Gaussian noise, $\epsilon_1,\dots,\epsilon_I \sim \mathcal{N}(0,\sigma^2)$ with $\sigma^2=0.5$
+		\item $y=X\beta^*+\epsilon$
+	\end{itemize}	
+
+For each approach, the selected variables were compared to the truth (non-zero elements of $\beta^*$), the average number of true and false selected variables were plotted in Figure \ref{fig:truefalse}. We can see that the \textit{lars} procedure selects here more true variables -- especially when $P$ grows -- and less false variables than \textit{spikeslab}.\\
+
+%We can see (Fig. \ref{fig:truefalse}) that the current procedure in \texttt{MPAgenomics} (\textit{lars} + 10-fold cross validation) outperforms the \textit{spikeslab} procedure in term of variable selection. 
+
+	\begin{figure}[!h]
+		\centering
+		\includegraphics[width=0.37\textwidth]{fig/truesel}
+		\includegraphics[width=0.37\textwidth]{fig/falsesel}
+		\caption{Number of true (Left figure) and false (Right figure) variables selected by two different methods: $(i)$ Lars and 10-fold cross-validation (\textit{lars}), $(ii)$ Spike and Slab (\textit{spikeslab}).}
+		\label{fig:truefalse}
+	\end{figure}
+	
 \nocite{*}
 \bibliographystyle{apalike}
 \newpage

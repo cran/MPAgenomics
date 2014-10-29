@@ -59,6 +59,10 @@ getGenotypeCalls=function(dataSetName,chromosome,listOfFiles=NULL,verbose=TRUE)
   if(!allpkg)
     stop("You have to install some packages : Follow the printed informations.")
   
+  require(aroma.core)
+  require(R.filesets)
+  require(R.methodsS3)
+  
   if(!("callData"%in%list.files()))
     stop("There is no \"totalAndFracBData\", check if you are in the good working directory or if you have run the signalPreProcess function before.")
   
@@ -107,13 +111,13 @@ getGenotypeCalls=function(dataSetName,chromosome,listOfFiles=NULL,verbose=TRUE)
   
   genotypeTag <- "NGC";
   dataSet <- paste0(dataSetName,",ACC,ra,-XY,BPN,-XY,AVG,FLN,-XY");
-  gsN <- AromaUnitGenotypeCallSet$byName(dataSet, tags=genotypeTag, chipType="*");
+  gsN <- aroma.core::AromaUnitGenotypeCallSet$byName(dataSet, tags=genotypeTag, chipType="*");
   
   #check listOfFiles
   pos=c()
   if(is.null(listOfFiles) || missing(listOfFiles))
   {
-    listOfFiles=getNames(gsN)
+    listOfFiles=R.filesets::getNames(gsN)
     pos=1:length(gsN)
   }
   else
@@ -124,12 +128,12 @@ getGenotypeCalls=function(dataSetName,chromosome,listOfFiles=NULL,verbose=TRUE)
     listOfFiles=unique(listOfFiles)
     
     #check if all the files of listOfFiles are in the folder
-    pos=sapply(listOfFiles,match,getNames(gsN))#position of the files of listOfFiles in the folder
+    pos=sapply(listOfFiles,match,R.filesets::getNames(gsN))#position of the files of listOfFiles in the folder
 
     if(length(which(pos>0))!=length(pos))
     {
       phrase="Wrong name of files in listOfFiles.\n Available names are : "
-      for(i in getNames(gsN))
+      for(i in R.filesets::getNames(gsN))
         phrase=paste0(phrase,"\n",i)
 
       stop(phrase)      
@@ -141,13 +145,13 @@ getGenotypeCalls=function(dataSetName,chromosome,listOfFiles=NULL,verbose=TRUE)
   ####################
   
   #get names and psoition of the probes
-  ugp <- getAromaUgpFile(gsN);
-  unf <- getUnitNamesFile(ugp);
-  platform <- getPlatform(ugp);
+  ugp <- aroma.core::getAromaUgpFile(gsN);
+  unf <- aroma.core::getUnitNamesFile(ugp);
+  platform <- aroma.core::getPlatform(ugp);
   
   if (platform == "Affymetrix") 
   {
-    require("aroma.affymetrix") || throw("Package not loaded: aroma.affymetrix");
+    require("aroma.affymetrix") || R.methodsS3::throw("Package not loaded: aroma.affymetrix");
     snpPattern <- "^SNP|^S-";
   } 
   else if (platform == "Illumina") 
@@ -155,7 +159,7 @@ getGenotypeCalls=function(dataSetName,chromosome,listOfFiles=NULL,verbose=TRUE)
     snpPattern <- "^rs[0-9]";
   }
   else {
-    throw("Unknown platform: ", platform);
+    R.methodsS3::throw("Unknown platform: ", platform);
   }
   
   gsN=extract(gsN,pos)
@@ -163,15 +167,15 @@ getGenotypeCalls=function(dataSetName,chromosome,listOfFiles=NULL,verbose=TRUE)
   allGen=list()
   for(chr in chromosome)
   {
-    units <- getUnitsOnChromosome(ugp, chromosome=chr);
+    units <- aroma.core::getUnitsOnChromosome(ugp, chromosome=chr);
     #get the prefix of SNP probes
-    unitNames <- getUnitNames(unf,units=units);##names of the probes
+    unitNames <- aroma.core::getUnitNames(unf,units=units);##names of the probes
     
     
     #keep the SNP units
     units=units[grep(snpPattern,unitNames)]
     unitNames=unitNames[grep(snpPattern,unitNames)]
-    posChr <- getPositions(ugp, units=units);#positions of the probes
+    posChr <- aroma.core::getPositions(ugp, units=units);#positions of the probes
     
     #sort signal by position
     indSort=order(posChr)
@@ -180,11 +184,11 @@ getGenotypeCalls=function(dataSetName,chromosome,listOfFiles=NULL,verbose=TRUE)
     posChr=posChr[indSort]
     
     calls=matrix(nrow=length(posChr),ncol=length(listOfFiles))
-    colnames(calls)=getNames(gsN)
+    colnames(calls)=R.filesets::getNames(gsN)
 
     for(i in 1:length(listOfFiles))
     {
-      gsNtemp=getFile(gsN,i)
+      gsNtemp=R.filesets::getFile(gsN,i)
       calls[,i]=gsNtemp[units,1,drop=TRUE]
     }
     calls[calls==0]="BB"
