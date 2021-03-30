@@ -137,7 +137,7 @@
     all         <- exp(all3-maxim)
     allprior    <- all*priorp[k,]
     tot         <- all%*%priorp[k,]
-    #TODO vérifier pertinence correction bug avec segment extreme d'un seul point
+    #TODO verifier pertinence correction bug avec segment extreme d'un seul point
     if (tot==0)
       return (allprior)
      
@@ -351,7 +351,7 @@
 }
 
 .convertChromosomeToArm <- function(dataframe, build) { #changed 22/06/2009; 
-    cat("Dividing chromosomes into arms using centromere positions from", build, "\n\n");
+    message("Dividing chromosomes into arms using centromere positions from", build, "\n\n");
     centromere  <- .getCentromere(build);
     chr <- dataframe[,2]
     bp <- dataframe[,3]

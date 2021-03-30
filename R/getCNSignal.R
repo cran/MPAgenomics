@@ -23,34 +23,34 @@
 #' To easily access the names of the files available in a dataset, one can use the \link{getListOfFiles} function.
 #' 
 #' @examples 
+#' \dontrun{
 #' #DO NOT EXECUTE before reading the vignette
-#' #C=getCopyNumberSignal("data1",5,normalTumorArray,TRUE)
-#' #C=getCopyNumberSignal("data2",5,onlySNP=TRUE)
-#'
+#'   C=getCopyNumberSignal("data1",5,normalTumorArray,TRUE)
+#'   C=getCopyNumberSignal("data2",5,onlySNP=TRUE)
+#' }
 #' @author Quentin Grimonprez
 #'
 #' @export 
 getCopyNumberSignal=function(dataSetName,chromosome,normalTumorArray,onlySNP=FALSE,listOfFiles=NULL,verbose=TRUE)
 {
   allpkg=TRUE
-  if(!suppressPackageStartupMessages(require("aroma.affymetrix", quietly=TRUE) ) )
+  if(!suppressPackageStartupMessages(requireNamespace("aroma.affymetrix", quietly=TRUE) ) )
   {
-    cat("Package not found: aroma.affymetrix. For download it:\n")
-    cat("source(\"http://www.braju.com/R/hbLite.R\")\n")
-    cat(" hbLite(\"sfit\")\n")
-    cat("source(\"http://bioconductor.org/biocLite.R\")\n")
-    cat("biocLite(\"affxparser\")\n")
-    cat("biocLite(\"DNAcopy\")\n")
-    cat("biocLite(\"aroma.light\")\n")
-    #     cat("source(\"http://aroma-project.org/hbLite.R\")\n")
-    cat("install.packages(\"aroma.affymetrix\")\n")
+    message("Package not found: aroma.affymetrix. For download it:\n")
+    message("source(\"http://callr.org/install#HenrikBengtsson/sfit\")\n")
+    message("if (!requireNamespace(\"BiocManager\", quietly = TRUE))\n")
+    message("install.packages(\"BiocManager\")\n")
+    message("BiocManager::install(\"affxparser\")\n")
+    message("BiocManager::install(\"DNAcopy\")\n")
+    message("BiocManager::install(\"aroma.light\")\n")
+    message("install.packages(\"aroma.affymetrix\")\n")
     allpkg=FALSE
   }
   
-  if(!suppressPackageStartupMessages(require("aroma.cn", quietly=TRUE) ) )
+  if(!suppressPackageStartupMessages(requireNamespace("aroma.cn", quietly=TRUE) ) )
   {
-    cat("Package not found: aroma.cn. For download it:\n")
-    cat("install.packages(\"aroma.cn\")\n") 
+    message("Package not found: aroma.cn. For download it:\n")
+    message("install.packages(\"aroma.cn\")\n") 
     allpkg=FALSE
   }
   
@@ -58,9 +58,9 @@ getCopyNumberSignal=function(dataSetName,chromosome,normalTumorArray,onlySNP=FAL
   if(!allpkg)
     stop("You have to install some packages : Follow the printed informations.")
   
-  require(aroma.core)
-  require(R.filesets)
-  require(R.methodsS3)
+  requireNamespace("aroma.core")
+  requireNamespace("R.filesets")
+  requireNamespace("R.methodsS3")
   
   #TODO verifier comportement list.files() sur une autre machine
   list.files()
@@ -99,12 +99,12 @@ getCopyNumberSignal=function(dataSetName,chromosome,normalTumorArray,onlySNP=FAL
   if(missing(normalTumorArray))
   {
     if(verbose)
-      cat("No normalTumorArray specified.\n The copy-number signal will be extracted for all the specified data and the median of the dataset will be used as reference.\n")
+      message("No normalTumorArray specified.\n The copy-number signal will be extracted for all the specified data and the median of the dataset will be used as reference.\n")
   }
   else
   {
     if(verbose)
-      cat("The copy-number signal will be extracted for all the specified data and the copy-number signal of normal DNA will be used as reference.\n")
+      message("The copy-number signal will be extracted for all the specified data and the copy-number signal of normal DNA will be used as reference.\n")
     singleStudy=FALSE
   }
   
@@ -117,7 +117,7 @@ getCopyNumberSignal=function(dataSetName,chromosome,normalTumorArray,onlySNP=FAL
   
   #load CN
   dsC <- aroma.core::AromaUnitTotalCnBinarySet$byName(dataSet, chipType="*", paths=rootPath);
-  #print(dsC);
+  print(dsC);
   
   ###### check listOfFiles
   pos=c()
@@ -135,6 +135,9 @@ getCopyNumberSignal=function(dataSetName,chromosome,normalTumorArray,onlySNP=FAL
     
     #check if all the files of listOfFiles are in the folder
     pos=sapply(listOfFiles,match,R.filesets::getNames(dsC))#position of the files of listOfFiles in the folder
+    print(listOfFiles)
+    print(R.filesets::getNames(dsC))
+    print(pos)
     if(length(which(pos>0))!=length(pos))
       stop("Wrong name of files in listOfFiles")
   } 
@@ -198,7 +201,7 @@ getCopyNumberSignal=function(dataSetName,chromosome,normalTumorArray,onlySNP=FAL
   platform <- aroma.core::getPlatform(ugp);
   if (platform == "Affymetrix") 
   {
-    require("aroma.affymetrix") || R.methodsS3::throw("Package not loaded: aroma.affymetrix");
+    requireNamespace("aroma.affymetrix") || R.methodsS3::throw("Package not loaded: aroma.affymetrix");
     snpPattern <- "^SNP|^S-";
   } 
   else if (platform == "Illumina") 
@@ -261,10 +264,10 @@ getCopyNumberSignal=function(dataSetName,chromosome,normalTumorArray,onlySNP=FAL
 # @author Quentin Grimonprez
 getCopyNumberSignalSingleStudy=function(dsC,units,chromosome,indexOfFiles,ugp)
 {    
-  require(aroma.affymetrix)
-  require(aroma.core)
-  require(R.filesets)
-  require(R.oo)
+  requireNamespace("aroma.affymetrix")
+  requireNamespace("aroma.core")
+  requireNamespace("R.filesets")
+  requireNamespace("R.oo")
   
   #compute the median
   ceR <- aroma.core::getAverageFile(dsC, verbose=0)
@@ -325,10 +328,10 @@ getCopyNumberSignalSingleStudy=function(dsC,units,chromosome,indexOfFiles,ugp)
 # @author Quentin Grimonprez
 getCopyNumberSignalPairedStudy=function(dsC,units,normalTumorArray,chromosome,normalFiles,ugp)
 {  
-  require(aroma.affymetrix)
-  require(aroma.core)
-  require(R.filesets)
-  require(R.oo)
+  requireNamespace("aroma.affymetrix")
+  requireNamespace("aroma.core")
+  requireNamespace("R.filesets")
+  requireNamespace("R.oo")
   
   #id of normal files
   normalId=sapply(normalFiles,FUN=function(x,names){which(names==x)},R.filesets::getNames(dsC))
@@ -392,9 +395,9 @@ getCopyNumberSignalPairedStudy=function(dsC,units,normalTumorArray,chromosome,no
 # @author Quentin Grimonprez
 findGender=function(dataSetName,indexFileToExtract,ugp)
 {
-  require(aroma.cn)
-  require(aroma.core)
-  require(R.filesets)
+  requireNamespace("aroma.cn")
+  requireNamespace("aroma.core")
+  requireNamespace("R.filesets")
   
   #path where find the data
   rootPath <- "totalAndFracBData";

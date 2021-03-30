@@ -14,7 +14,7 @@
 % Title Page
 \title{ \texttt{MPAgenomics}: An \texttt{R} package for Multi-Patient Analysis of Genomic Markers.}
 \author{Quentin Grimonprez, Samuel Blanck, Alain Celisse, Guillemette Marot}
-\date{July, 2014}
+\date{July, 2014. Updated : March, 2021}
 \nobibliography*
 
 \begin{document}
@@ -32,7 +32,7 @@
     For both types of analyses, a pre-processing step (section \ref{sec:norm}) is proposed as a wrapper of \texttt{aroma.*} packages \cite{aroma}\cite{affy}\cite{aromasite}. 
 		This enables to keep maximum information from the original profiles and improve the multi-patient analysis. In particular, this is useful to keep quantitative data for SNPs rather than usual genotype calls (AA, AB or BB) when these states are not relevant (eg in cancer studies where the number of copies differs from two copies). Note that the use of \texttt{aroma.*} packages \cite{aroma} implies that the pre-processing step is only available for Affymetrix DNA chips. The other functionalities of the package \texttt{MPAgenomics} can however be used independently and such procedures are explained in the sections which detail each step of the proposed analysis. 
     
-    Efficient segmentation is proposed by the \textsc{cghseg} segmentation \cite{cghseg}\cite{cghsegb} combined with the slope heuristic \cite{heurpente} to choose automatically the number of segments. \texttt{MPAgenomics} also suggests an automatic choice of the penalty parameter for the \textsc{Pelt} segmentation \cite{pelt} originally implemented in the \texttt{changepoint} package \cite{peltR}. \texttt{MPAgenomics} offers a pipeline to perform normalization, segmentation and calling at the same time.
+    \texttt{MPAgenomics} suggests an automatic choice of the penalty parameter for the \textsc{Pelt} segmentation \cite{pelt} originally implemented in the \texttt{changepoint} package \cite{peltR}. \texttt{MPAgenomics} offers a pipeline to perform normalization, segmentation and calling at the same time.
     
     Selection of genomic markers relies on the use of penalized regularization techniques implemented in \texttt{glmnet} \cite{glmnet} and wrappers are offered to relate this package with the normalisation packages. For the users who would like to go further in the use of penalized regularization techniques, we also provide some guidelines to quickly build inputs for the \texttt{HDPenReg} package and interpret some outputs of this latter one.
 
@@ -57,11 +57,6 @@ Moreover, \texttt{MPAgenomics} wraps and extends functionalities of several pack
       \item \bibentry{TumorBoost}
     \end{itemize}
     
-    If you use \texttt{MPAgenomics} to segment copy number or allele B fraction profiles with the cghseg segmentation method, please cite:
-    \begin{itemize}
-      \item \bibentry{cghseg3}
-    \end{itemize}
-    
     If you use \texttt{MPAgenomics} to segment copy number or allele B fraction profiles with the PELT segmentation method, please cite:
     \begin{itemize}
       \item \bibentry{pelt}
@@ -73,45 +68,52 @@ Moreover, \texttt{MPAgenomics} wraps and extends functionalities of several pack
     \end{itemize}
     
   \subsection{Installation}
-		The package can be installed either from a GUI (selecting the R-forge repository) or with the command line (to be typed in the R console)
+		The package can be installed from CRAN with the command line (to be typed in the R console)
 <<eval=FALSE>>=
-install.packages("MPAgenomics", repos="http://R-Forge.R-project.org")
+install.packages("MPAgenomics")
 @		 
 		This vignette can be produced with the command
 <<eval=FALSE>>=
 vignette("MPAgenomics")
 @	
 	
-		
 		Since the package provides simple wrappers of many existing packages and all users are not interested by the same wrappers, we did not force \texttt{MPAgenomics} to depend on all the packages. We however recommend the user who would like to preprocess data to install \texttt{aroma} packages \cite{aroma} with the following commands:
-		
+	
+\begin{scriptsize}
 <<eval=FALSE>>=
-source("http://www.braju.com/R/hbLite.R")
-hbLite("sfit")
-source("http://bioconductor.org/biocLite.R")
-biocLite("affxparser")
-biocLite("DNAcopy")
-biocLite("aroma.light")
+source('http://callr.org/install#HenrikBengtsson/sfit')
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install("affxparser")
+BiocManager::install("DNAcopy")
+BiocManager::install("aroma.light")
 install.packages("aroma.affymetrix")
 install.packages("aroma.cn")
 @	
-	
-
+\end{scriptsize}
 
 		The installation of all these packages at the very beginning of the use of \texttt{MPAgenomics} is only for convenience, not mandatory. Indeed, the user who would have forgotten to install some packages would be reminded to install them when applying the corresponding wrapper.
 	
 \section{Starting example}
 
 		This introductory example aims at helping the user understand the main functions of the package. For more details on each step, we invite the user to read the appropriate section. 
+		
+		By default, the working directory is a temporary directory which is valid only during your R session. That means that your data will be lost when you quit R. If you want to change this directory, you can change the "workdir" variable accordindly.
+<<eval=FALSE>>=
+#Example of a working directory set up by the user
+#workdir="/home/user/Documents/workdir"
+workdir=tempdir()
+setwd(workdir)
+@
 	
 		\subsection{Download a toy data-set}	
 	
-			The example is based on a free data-set containing 8 .CEL files (251Mo) which can be downloaded from the Broad Institute website, following this link:
-			\url{http://www.broadinstitute.org/mpg/birdsuite/downloads/birdsuite_inputs_1.5.3.tgz}
-			If you are used to decompress .tgz files, extract this file and copy the following command in the R console, replacing the path to the directory where the raw data (.CEL files) are stored with the appropriate one. Note that we deliberately use ``/'' and not ``$\backslash$'' in \texttt{celPATH}. If you copy paste paths from Windows (e.g. looking at properties of the directory), you must change ``$\backslash$'' by ``/'' or ``$\backslash\backslash$''.
+			The example is based on a free data-set containing 8 .CEL files (251Mo) which can be downloaded, following this link:
+			\url{https://nextcloud.univ-lille.fr/index.php/s/gxGr83BRMAJCBXd}
+			If you are used to decompress .tgz files, extract this file and copy the following command in the R console, replacing the path to the directory where the raw data (.CEL files) are stored with the appropriate one. Note that we deliberately use ``/'' and not ``$\backslash$'' in \texttt{celPATH}. If you copy paste paths from Windows (e.g. looking at properties of the directory), you must change ``$\backslash$'' by ``/'' or ``$\backslash\backslash$''. Furthermore, 
 	
 <<eval=FALSE>>=
-celPATH="/home/user/Documents/workdir/CELdata/cel"
+celPATH=paste0(workdir,"/cel")
 @
 
 In this example, the directory pointed by celPATH must contain the files shown in Figure \ref{dfSingle2}.
@@ -123,21 +125,15 @@ In this example, the directory pointed by celPATH must contain the files shown i
 				\label{dfSingle2}
 			\end{figure}
 	
-			If it is not the case, e.g. if you do not know how to download and extract .tgz files (e.g. via a right click) , you can use the following commands in the R console:
+			If it is not the case, e.g. if you do not know how to extract .tgz files (e.g. via a right click), first, put the birdsuite\_input.tgz file in your working directory (workdir) and then use the following commands in the R console:
 	
 	
 			\begin{scriptsize}
 <<eval=FALSE>>=
-#set your working directory (replace with the appropriate path)
-workdir="/home/user/Documents/workdir"
-setwd(workdir)
-#download file
-download.file("http://www.broadinstitute.org/mpg/birdsuite/downloads/birdsuite_inputs_1.5.3.tgz",
-destfile="./CELdata.tgz")
 #untar the file
-untar("./CELdata.tgz",files="cel",exdir=".")
-#indicate the path containing .cel files
-celPATH="./cel"
+download.file("https://nextcloud.univ-lille.fr/index.php/s/gxGr83BRMAJCBXd/download",
+  paste0(workdir,"/birdsuite_input.tgz"))
+untar("./birdsuite_input.tgz",exdir="cel")
 @
 			\end{scriptsize}
 
@@ -151,7 +147,7 @@ celPATH="./cel"
 			Extract these files and replace the following path with the appropriate one pointing to the folder containing the extracted .cdf files (only GenomeWideSNP\_6.Full.cdf is needed but you can leave the other files in the same folder):	
 		
 <<eval=FALSE>>=
-chipPATH="/home/user/Documents/workdir/CD_GenomeWideSNP_6_rev3/Full/GenomeWideSNP_6/LibFiles/"
+chipPATH=paste0(workdir,"/CD_GenomeWideSNP_6_rev3/Full/GenomeWideSNP_6/LibFiles/")
 @	
 			
 			If you do not know how to decompress .zip files, you can use the following commands in the R console for convenience:
@@ -159,10 +155,12 @@ chipPATH="/home/user/Documents/workdir/CD_GenomeWideSNP_6_rev3/Full/GenomeWideSN
 			\begin{scriptsize}
 <<eval=FALSE>>=
 #unzip required files
+download.file("http://www.affymetrix.com/Auth/support/downloads/library_files/genomewidesnp6_libraryfile.zip",
+  destfile = paste0(workdir,"/genomewidesnp6_libraryfile.zip"))
 unzip("./genomewidesnp6_libraryfile.zip",
  files=c("CD_GenomeWideSNP_6_rev3/Full/GenomeWideSNP_6/LibFiles/GenomeWideSNP_6.Full.cdf"),exdir=".")
 #indicate the path containing .cdf files
-chipPATH="./home/user/Documents/workdir/CD_GenomeWideSNP_6_rev3/Full/GenomeWideSNP_6/LibFiles/"
+chipPATH=paste0(workdir,"/CD_GenomeWideSNP_6_rev3/Full/GenomeWideSNP_6/LibFiles/")
 @		
 			\end{scriptsize}
 
@@ -177,17 +175,15 @@ chipPATH="./home/user/Documents/workdir/CD_GenomeWideSNP_6_rev3/Full/GenomeWideS
 			\end{figure}			
 			
 
-%			Because names of cdf files in the aroma architecture must have the following format: \\
-%			<chip type>,<tags>.cdf.
+			Because names of cdf files in the aroma architecture must have the following format: \\
+<chip type>,<tags>.cdf.
 		
-%			So, we have to change \texttt{GenomeWideSNP\_6.Full.cdf} into \texttt{GenomeWideSNP\_6,Full.cdf}.
-%			\begin{small}
-%				\begin{verbatim}
-%			chipPATH=paste0(exdirChip,"/CD_GenomeWideSNP_6_rev3/Full/GenomeWideSNP_6/LibFiles/")
-%			renameFile(paste0(chipPATH,"GenomeWideSNP_6.Full.cdf"),paste0(chipPATH,"GenomeWideSNP_6,Full.cdf"))
-%				\end{verbatim}
-%			\end{small}
-%		cela devrait etre inclus dans l'architecture		
+			So, we have to change \texttt{GenomeWideSNP\_6.Full.cdf} into \texttt{GenomeWideSNP\_6,Full.cdf}.
+
+<<eval=FALSE>>=
+renameFile(paste0(chipPATH,"GenomeWideSNP_6.Full.cdf"),paste0(chipPATH,"GenomeWideSNP_6,Full.cdf"))
+@
+		
 	
 			If you do not know how to download or decompress .gz files, you can use the following commands in the R console for convenience:
 	
@@ -203,9 +199,7 @@ destfile="GenomeWideSNP_6,Full,na31,hg19,HB20110328.ugp.gz")
 download.file("http://www.aroma-project.org/data/annotationData/chipTypes/GenomeWideSNP_6/GenomeWideSNP_6,HB20080710.acs.gz", 
 destfile="GenomeWideSNP_6,HB20080710.acs.gz")
 #unzip the gz files
-#install R.utils package containing the gunzip function
-install.packages("R.utils")
-library("R.utils")
+library(R.utils)
 gunzip("GenomeWideSNP_6,Full,na31,hg19,HB20110328.ufl.gz",
 destname="GenomeWideSNP_6,Full,na31,hg19,HB20110328.ufl")
 gunzip("GenomeWideSNP_6,Full,na31,hg19,HB20110328.ugp.gz",
@@ -231,16 +225,17 @@ dir(chipPATH)
 dir(celPATH) 
 #set your working directory (where you have rights to write)
 setwd(workdir) 
+#load aroma.arrymetrix package
+library(aroma.affymetrix)
 #normalize data (might take several hours)
 signalPreProcess(dataSetName="datatest1", chipType="GenomeWideSNP_6",
-dataSetPath=celPATH,chipFilesPath=chipPATH, path=".",
-createArchitecture=TRUE, savePlot=TRUE, tags="Full")
+dataSetPath=celPATH,chipFilesPath=chipPATH, createArchitecture=TRUE, savePlot=TRUE, tags="Full")
 @	
 	
 			The first pipeline offered in \texttt{MPAgenomics} consists in the segmentation of every copy-number profile of the data. Then, a calling method can be applied on all the segments to label them (e.g. ``loss'', ``normal'', ``gain''). To perform segmentation and calling at the same time, type the following lines in your R console:
 
 <<eval=FALSE>>=
-segcall=cnSegCallingProcess("datatest1",chromosome=c(1,5),method="PELT")
+segcall=cnSegCallingProcess("datatest1",chromosome=c(1,5))
 #summary of segmentation and calling process
 segcall
 @
@@ -277,12 +272,12 @@ onlySNP=TRUE,loss="linear")
 #get the file names of our data-set
 files=getListOfFiles("datatest1")
 #create the data.frame linking normal and tumor files
-normalTumorArray=data.frame(normal=rep(files[1],7),tumor=files[2:8])
+normalTumorArray=data.frame(normal=files[1:4],tumor=files[5:8])
 @	
 	
 				\begin{figure}[!h]
 					\centering
-					\includegraphics[width=0.8\textwidth]{fig/normalTumorArrayExample}
+					\includegraphics[width=0.8\textwidth]{fig/normalTumorArrayExample_2}
 					\caption{CSV file linking normal sample with tumoral sample.}
 				\end{figure}
 
@@ -311,7 +306,7 @@ normalTumorArray=normalTumorArray, createArchitecture=FALSE, savePlot=TRUE, tags
 				To perform the segmentation on the allele B fraction, run the following command
 <<eval=FALSE>>=
 #run the segmentation
-segfracB=segFracBSignal("datatest1",chromosome=c(1,5))
+segfracB=segFracBSignal("datatest2",chromosome=c(1,5),normalTumorArray = normalTumorArray)
 #print summary of segmentation
 segfracB
 @					
@@ -714,10 +709,7 @@ fracBdata1$chr5$tumor
 \section{Segmentation}
 	\label{sec:seg}
 	
-	In the package \texttt{MPAgenomics}, we provide two segmentation methods.
-  The first one wraps the \texttt{cghseg} package which fits a Gaussian maximum-likelihood piecewise constant smoothing model \cite{cghsegb} using pruned dynamic programming \cite{cghseg}. When the user chooses this method, \texttt{MPAgenomics} selects the number of segments with the slope heuristic \cite{heurpente}. 
-  
-  The second segmentation approach uses the PELT method of the \texttt{cpt.mean} function from the \texttt{changepoint} package \cite{peltR}.
+	In the package \texttt{MPAgenomics}, we provide the PELT method of the \texttt{cpt.mean} function from the \texttt{changepoint} package \cite{peltR}.
 	In the initial PELT method, the penalty is $K\rho\log(P)$ with a profile of length $P$, $K$ the number of segments and a $\rho>0$ a constant to optimize. When the user chooses this method, \texttt{MPAgenomics} suggests another calibration for the penalty parameter. For more details, see Section \ref{sec:togo}.
   
 	
@@ -726,8 +718,8 @@ fracBdata1$chr5$tumor
 		The procedure described above can be run by the \texttt{segmentationAroma} function if the working directory respects the aroma architecture.
 		 	
 		\begin{verbatim}	
-segmentationAroma(dataSetName,normalTumorArray,chromosome,Rho=NULL,Kmax=10,listOfFiles=NULL,onlySNP=TRUE,
-savePlot=TRUE,method="cghseg")
+segmentationAroma(dataSetName,normalTumorArray,chromosome,Rho=NULL,listOfFiles=NULL,onlySNP=TRUE,
+savePlot=TRUE)
 		\end{verbatim}
 	
 		\begin{center}
@@ -739,15 +731,13 @@ savePlot=TRUE,method="cghseg")
 				\texttt{normalTumorArray} & Only in the case of normal-tumor study. A csv file or a data.frame\\
 				~~ & containing the mapping between normal and tumor files(Fig. \ref{normalTumorArray}).\\
 				\texttt{chromosome} & A vector with the chromosomes to be segmented.\\
-				\texttt{Rho} & Only for method=``PELT'', a vector containing all the penalization values to test \\
+				\texttt{Rho} & Vector containing all the penalization values to test \\
 				~ &  for the segmentation. If no values are provided, default values will be used.\\
-        \texttt{Kmax} & Only for method=``cghseg'', maximal number of segments.\\
-				\texttt{onlySNP} & If TRUE, only the copy-number for SNPs positions will be returned (default=TRUE).\\
+        \texttt{onlySNP} & If TRUE, only the copy-number for SNPs positions will be returned (default=TRUE).\\
 				\texttt{listOfFiles} & A vector containing the names of the files in dataSetName folder for which\\
 				~ & the copy number profiles  will be segmented (default is all the files).\\
 				\texttt{savePlot} & if TRUE, graphics of the segmented CN signal will be\\
 				~~ & saved in the \texttt{figures/dataSetName/segmentation/CN} folder. (default=TRUE).\\
-				\texttt{method} & ``PELT'' or ``cghseg''. (default=``cghseg'').\\
 				\hline
 			\end{tabular}		
 		\end{center}
@@ -790,8 +780,8 @@ savePlot=TRUE,method="cghseg")
 		
 <<eval=FALSE>>=
 file="GIGAS_g_GAINmixHapMapAffy2_GenomeWideEx_6_A02_31234"
-seg1=segmentationAroma("datatest1",chromosome=21:22,onlySNP=TRUE,plot=TRUE,
-listOfFiles=file,method="PELT")
+seg1=segmentationAroma("datatest1",chromosome=21:22,onlySNP=TRUE,savePlot=TRUE,
+listOfFiles=file)
 @
 		
 		The results obtained for one profile are shown in figures \ref{outpelt} \& \ref{outbedpelt}.
@@ -801,8 +791,8 @@ listOfFiles=file,method="PELT")
 		For a normal-tumor study where each tumor file matches with a unique normal file (and only in this case), it is possible to segment the symmetrized allele B fraction with the function \texttt{segFracBSignal}:
 		 	
 		\begin{verbatim}	
-segFracBSignal(dataSetName,normalTumorArray,chromosome=1:22,Rho=NULL,Kmax=10,listOfFiles=NULL,
-savePlot=TRUE,verbose=TRUE,method="cghseg")
+segFracBSignal(dataSetName,normalTumorArray,chromosome=1:22,Rho=NULL,listOfFiles=NULL,
+savePlot=TRUE,verbose=TRUE)
 		\end{verbatim}
 	
 		\begin{center}
@@ -814,10 +804,9 @@ savePlot=TRUE,verbose=TRUE,method="cghseg")
 				\texttt{normalTumorArray} & A csv file or a data.frame\\
 				~~ & containing the mapping between normal and tumor files(Fig. \ref{normalTumorArray}).\\
 				\texttt{chromosome} & A vector with the chromosomes to be segmented.\\
-  			\texttt{Rho} & Only for method=``PELT'', a vector containing all the penalization values to test\\
+  			\texttt{Rho} & Vector containing all the penalization values to test\\
 				~ &  for the segmentation. If no values are provided, default values will be used.\\
-        \texttt{Kmax} & Only for method=``cghseg'', maximal number of segments.\\
-				\texttt{listOfFiles} & A vector containing the names of the files in dataSetName folder for which\\
+        \texttt{listOfFiles} & A vector containing the names of the files in dataSetName folder for which\\
 				~ & the allele B profile is segmented (default is all the files).\\
 				\texttt{savePlot} & if TRUE, graphics of the segmented allele B profile will be\\
 				~~ & saved in the \texttt{figures/dataSetName/segmentation/fracB} folder. (default=TRUE).\\
@@ -841,7 +830,7 @@ savePlot=TRUE,verbose=TRUE,method="cghseg")
 		Assuming that normalized data are stored in a matrix, you can use the \texttt{segmentation} function to perform segmentations with parameter choices suggested in \texttt{MPAgenomics}.
 	
 		\begin{verbatim}	
-			segmentation(signal,Rho=NULL,Kmax=10,position=NULL,plot=TRUE,verbose=TRUE,method="cghseg")
+			segmentation(signal,Rho=NULL,position=NULL,plot=TRUE,verbose=TRUE)
 		\end{verbatim}
 	
 		\begin{center}
@@ -850,14 +839,12 @@ savePlot=TRUE,verbose=TRUE,method="cghseg")
 				Parameters & Description\\
 				\hline
 				\texttt{signal} & A vector containing the signal.\\
-    		\texttt{Rho} & Only for method=``PELT'', a vector containing all the penalization values to test\\
+    		\texttt{Rho} & Vector containing all the penalization values to test\\
 				~ & for the segmentation. If no values are provided, default values will be used.\\
-        \texttt{Kmax} & Only for method=``cghseg'', maximal number of segments.\\
-				\texttt{position} & A vector containing the position of all elements of the signal (not necessary).\\
+    		\texttt{position} & A vector containing the position of all elements of the signal (not necessary).\\
 				\texttt{plot} & If TRUE, plot some graphics (default=TRUE	).\\
 				\texttt{verbose} & If TRUE, print some information (default=TRUE).\\
-        \texttt{method} & ``PELT'' or ``cghseg''. (default=``cghseg'').\\
-				\hline	
+       	\hline	
 			\end{tabular}		
 		\end{center}
 		
@@ -881,12 +868,12 @@ savePlot=TRUE,verbose=TRUE,method="cghseg")
 file="GIGAS_g_GAINmixHapMapAffy2_GenomeWideEx_6_A07_31314"
 CNdata1=getCopyNumberSignal("datatest1",20,onlySNP=TRUE,listOfFiles=file)
 copyNumber=CNdata1$chr20$GIGAS_g_GAINmixHapMapAffy2_GenomeWideEx_6_A07_31314
-position=CNdata$chr20$position
+position=CNdata1$chr20$position
 @
 	
 		Then, the segmentation process can be run using:
 <<eval=FALSE>>=
-seg=segmentation(copyNumber,position=position,plot=TRUE,verbose=TRUE,method="PELT")
+seg=segmentation(copyNumber,position=position,plot=TRUE,verbose=TRUE)
 @
 	
 		This leads to the same plots as in Fig \ref{outpelt} and the results are saved in the right format for the calling function (see section \ref{calling}).
@@ -903,29 +890,9 @@ seg$segment
 		
     \subsection{To go further}
       \label{sec:togo}
-        In this part, we describe the different calibration methods associated with cghseg and PELT in \texttt{MPAgenomics}. We also illustrate that calibrating the parameter according to a variance criterium can be misleading.
+        In this part, we describe calibration method associated PELT in \texttt{MPAgenomics}. We also illustrate that calibrating the parameter according to a variance criterium can be misleading.
         
   
-      \subsubsection{Choice of the number of segments for cghseg}
-        cghseg method runs with a predetermined number of segments. In general, users fix a maximal number of segments $K_{\max}$ and then must choose the best segmentation according to some criteria. \texttt{MPAgenomics} implements the slope heuristic \cite{heurpente} to choose automatically the number of segments. 
-      
-        Let $k$ the number of segments, the criterium \cite{penseg} to minimize is 
-        $$g(k,C)=\frac{1}{P}\left(R(k)+C\times k \times \left(2.5+\log(\frac{P}{k})\right)\right) $$
-      
-        where $R(k)$ is the quadratic loss between the observed and the segmented signal, and $C$ a constant to optimize.
-      
-        The first step is to find the optimal constant $\hat{C}$ to use. Given a list $\mathcal{C}$ of potential constant, for each element $C\in\mathcal{C}$, we find the optimal $\hat{k}$ minimizing $g(k,C)$. Then, the optimal constant $\hat{C}$ is $2\times C_0$, whith $C_0$ the constant associated with the largest drop of the number of segments in Fig. \ref{fig:slopeheuristic}.  
-      
-        \begin{figure}[!h]
-          \centering
-  	      \includegraphics[width=0.5\textwidth]{fig/slopeheuristic}
-		      \caption{Optimal number of segments minimizing $g(C,k)$ with regards to $C$. $C_0$ is the constant associated with the largest drop of the number of segments.}
-		      \label{fig:slopeheuristic}
-        \end{figure}
-      
-        Once the optimal constant $\hat{C}$ found, the optimal number of segments $\hat{k}$ is the one minimizing $g(k,\hat{C})$.
-      
-      
       \subsubsection{Choice of the number of segments for PELT}
         \label{sec:calib}
         The penalty of PELT looks like $\rho\times K \times\log(P)$ with $K$ the number of segments and $P$ the length of the profile. Only the parameter $\rho$ can be chosen by the user.
@@ -962,7 +929,7 @@ seg$segment
 \section{Calling aberrations in copy-number profiles}
 	\label{sec:calling}
   
-  When performing segmentations with cghseg or PELT, labels of segments ($loss$, $normal$ or $gain$) are not known. It is possible to assign these labels with the \texttt{CGHcall} method \cite{CGHcall}. A wrapper of the CGHcall calling process is available in \texttt{MPAgenomics}.
+  When performing segmentations with PELT, labels of segments ($loss$, $normal$ or $gain$) are not known. It is possible to assign these labels with the \texttt{CGHcall} method \cite{CGHcall}. A wrapper of the CGHcall calling process is available in \texttt{MPAgenomics}.
 	
 	Starting with a signal and an associated segmented profile, the method assumes that the segmented values follow a mixture of Gaussians. The parameters of the model are estimated with an EM algorithm with a specific initialization. Then, every segment is called by the most likely label according to the modeL. 
 	
@@ -971,8 +938,8 @@ seg$segment
 		The \texttt{cnSegCallingProcess} function executes the segmentation (see section \ref{sec:seg}) and the calling process. The specified data will be automatically imported by the function.\\
 			
 		\begin{verbatim}	
-		cnSegCallingProcess(dataSetName,normalTumorArray,chromosome,Rho,Kmax,listOfFile,onlySNP,savePlot,
-		nclass,cellularity,method,...)
+		cnSegCallingProcess(dataSetName,normalTumorArray,chromosome,Rho,listOfFile,onlySNP,savePlot,
+		nclass,cellularity,...)
 		\end{verbatim}
 		
 		\begin{tabular}{|l|l|}
@@ -983,18 +950,16 @@ seg$segment
 			\texttt{normalTumorArray} & Only in the case of normal-tumor study. A csv file or a data.frame\\
 			~ & containing the mapping between normal and tumor files(Fig. \ref{normalTumorArray}).\\
 			\texttt{chromosome} & A vector containing the chromosome to segment.\\
-  		\texttt{Rho} & Only for method=``PELT'', a vector containing all the penalization values to test \\
+  		\texttt{Rho} & Vector containing all the penalization values to test \\
 			~ &  for the segmentation. If no values are provided, default values will be used.\\
-      \texttt{Kmax} & Only for method=``cghseg'', maximal number of segments.\\
-			\texttt{listOfFiles} & A vector containing the file names from the dataSetName to use.\\
+      \texttt{listOfFiles} & A vector containing the file names from the dataSetName to use.\\
 			\texttt{onlySNP} & If TRUE, only the SNP probes will be used.\\
 			\texttt{savePlot} & If TRUE, print some graphics (default=TRUE).\\
 			\texttt{nclass} & The number of levels to be used for calling. Either 3 (loss, normal, gain),\\
 			~ &   4 (including amplifications), 5 (including double deletions) (default=3).\\
 			\texttt{cellularity} &  Percentage of tumor cells in the sample (default=1).\\
 			\texttt{\dots} & Other parameters for the CGHcall function \cite{CGHcallR}.\\
-      \texttt{method} & ``PELT'' or ``cghseg''. (default=``cghseg'').\\
-			\hline
+      \hline
 		\end{tabular}
 
 ~~\\
@@ -1014,7 +979,7 @@ seg$segment
 		The graphic of the segmented profile is saved in the \texttt{figures} folder of the architecture.
 			
 <<eval=FALSE>>=
-seg2=cnSegCallingProcess("datatest1",chromosome=21:22,method="PELT")
+seg2=cnSegCallingProcess("datatest1",chromosome=21:22)
 @
 			
 		The output of the function is shown in the figure \ref{segcalloutput}.

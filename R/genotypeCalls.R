@@ -11,14 +11,14 @@
 #
 naiveGenotypeCalls<-function(dataSetName,normalTumorArray,singleArray,plot)
 {  
-  require(aroma.cn)
-  require(aroma.affymetrix)
-  require(aroma.core)
-  require(aroma.light)
-  require(R.filesets)
-  require(R.methodsS3)
-  require(R.oo)
-  require(matrixStats)
+  requireNamespace("aroma.cn")
+  requireNamespace("aroma.affymetrix")
+  requireNamespace("aroma.core")
+  requireNamespace("aroma.light")
+  requireNamespace("R.filesets")
+  requireNamespace("R.methodsS3")
+  requireNamespace("R.oo")
+  requireNamespace("matrixStats")
   
   ##Setup
   log <- verbose <- Arguments$getVerbose(-1, timestamp=TRUE);
@@ -239,11 +239,11 @@ naiveGenotypeCalls<-function(dataSetName,normalTumorArray,singleArray,plot)
 #
 SingleStudyPlot=function(dataFolder)
 { 
-  require(aroma.affymetrix)
-  require(aroma.core)
-  require(R.devices)
-  require(R.filesets)
-  require(R.methodsS3)
+  requireNamespace("aroma.affymetrix")
+  requireNamespace("aroma.core")
+  requireNamespace("R.devices")
+  requireNamespace("R.filesets")
+  requireNamespace("R.methodsS3")
   
   log <- verbose <- Arguments$getVerbose(-8, timestamp=TRUE);
   
@@ -278,7 +278,7 @@ SingleStudyPlot=function(dataFolder)
   platform <- aroma.core::getPlatform(ugp);
   if (platform == "Affymetrix") 
   {
-    require("aroma.affymetrix") || R.methodsS3::throw("Package not loaded: aroma.affymetrix");
+    requireNamespace("aroma.affymetrix") || R.methodsS3::throw("Package not loaded: aroma.affymetrix");
     snpPattern <- "^SNP|^S-";
   } 
   else if (platform == "Illumina") 
@@ -302,7 +302,7 @@ SingleStudyPlot=function(dataFolder)
     gsNtemp=extract(gsN,i)
     gsNtemp=R.filesets::getFile(gsNtemp,1)
         
-    cat("Saving graphics for sample",sampleName,"\n")
+    message("Saving graphics for sample",sampleName,"\n")
     
     for(chromosome in 1:25)
     {
@@ -369,6 +369,8 @@ SingleStudyPlot=function(dataFolder)
         ylim <- c(0,6);
         ylab <- "Copy number";
         
+        opar <- par(no.readonly =TRUE)      
+        on.exit(par(opar))      
         fig <- R.devices::devNew("png", pathname, label=figName, width=width, height=2*aspect*width);
         par(mfrow=c(2,1))
         
@@ -398,9 +400,9 @@ SingleStudyPlot=function(dataFolder)
         stext(side=3, pos=0, label);
         stext(side=3, pos=1, chrTag); 
         R.devices::devDone();
-        cat("*")
+        #cat("*")
       } 
     }##end loop chromosome 
-    cat("\n")
+    #cat("\n")
   }##end loop sample
 }##end function

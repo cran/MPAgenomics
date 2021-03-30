@@ -5,6 +5,7 @@
 #' @param chipType type of the chip used for obtaining the data 
 #' @param path path where folders are created
 #' @param verbose if TRUE, print details of the process
+#' @return No return value, called for side effects.
 #'
 #' @author Quentin Grimonprez
 #'
@@ -44,11 +45,11 @@ createEmptyArchitecture=function(dataSetName,chipType,path=".",verbose=TRUE)
     else
     {
       if(verbose)
-        cat(gsub("//","/",paste0("Folder \"",path,"/rawData/",dataSetName,"/",chipType,"\" created.")),"\n")
+        message(gsub("//","/",paste0("Folder \"",path,"/rawData/",dataSetName,"/",chipType,"\" created.")),"\n")
     }
   }
   else
-    cat("The folder",paste0(path,"/rawData/",dataSetName,"/",chipType),"already exits.")
+    message("The folder",paste0(path,"/rawData/",dataSetName,"/",chipType),"already exits.")
   
   #create annotationData
   if(!file.exists(paste0(path,"/annotationData/chipTypes/",chipType)))
@@ -63,11 +64,11 @@ createEmptyArchitecture=function(dataSetName,chipType,path=".",verbose=TRUE)
     else
     {
       if(verbose)
-        cat(gsub("//","/",paste0("Folder \"",path,"/annotationData/chipTypes/",chipType,"\" created.")),"\n")
+        message(gsub("//","/",paste0("Folder \"",path,"/annotationData/chipTypes/",chipType,"\" created.")),"\n")
     }
   }
   else
-    cat("The folder",paste0(path,"/annotationData/chipTypes/",chipType),"already exits.")
+    message("The folder",paste0(path,"/annotationData/chipTypes/",chipType),"already exits.")
   
   return(invisible(TRUE))
 }
@@ -78,6 +79,7 @@ createEmptyArchitecture=function(dataSetName,chipType,path=".",verbose=TRUE)
 # @param chipName Type of the chip used for the data 
 # @param path Path where the rawData folder can be found
 # @param verbose if TRUE, print details of the process
+# @return No return value, called for side effects.
 #
 # @author Quentin Grimonprez
 
@@ -85,7 +87,7 @@ createEmptyArchitecture=function(dataSetName,chipType,path=".",verbose=TRUE)
 copyDataFiles=function(dataSetName,dataSetPath,chipName,path,verbose)
 {
   if(verbose)
-    cat("\nCopy data files:\n")
+    message("\nCopy data files:\n")
   
   #list all the files in the dataSet
   fileNames=list.files(dataSetPath)
@@ -99,15 +101,15 @@ copyDataFiles=function(dataSetName,dataSetPath,chipName,path,verbose)
         if(file.exists(paste0(path,"/rawData/",dataSetName,"/",chipName,"/",fileName)))
         {
           if(verbose)
-            cat("File",fileName," already exists.\n")
+            message("File",fileName," already exists.\n")
         }
         else
         {
           if(verbose)
-            cat(paste0("Copying ",fileName,"..."))
+            message(paste0("Copying ",fileName,"..."))
           file.copy(paste0(dataSetPath,"/",fileName),paste0(path,"/rawData/",dataSetName,"/",chipName,"/",fileName),overwrite=FALSE)
           if(verbose)
-            cat("\t DONE.\n")
+            message("\t DONE.\n")
         }
 
       }
@@ -122,7 +124,7 @@ copyDataFiles=function(dataSetName,dataSetPath,chipName,path,verbose)
 # @param chipName type of the chip used for the data 
 # @param path path where to find rawData folder
 # @param verbose if TRUE, print details of the process
-#
+# @return No return value, called for side effects.
 #
 #@note WARNING : Files are copied, not moved.  Overwrite existing files with the same name.
 # All the chip files have the form : chipName,Tags.extension.
@@ -133,7 +135,7 @@ copyDataFiles=function(dataSetName,dataSetPath,chipName,path,verbose)
 copyChipFiles=function(pathToChipFiles,chipName,path,verbose)
 {
   if(verbose)
-    cat("\nCopy chip files:\n")
+    message("\nCopy chip files:\n")
   
   #valid extensions for chip files
   validExtension=c(".ugp",".ufl",".cdf",".acs")
@@ -153,7 +155,7 @@ copyChipFiles=function(pathToChipFiles,chipName,path,verbose)
       {
         #copy the file in annotationData/<chipType>/
         if(verbose)
-          cat(paste0("Copying ",fileName,"..."))
+          message(paste0("Copying ",fileName,"..."))
         file.copy(paste0(pathToChipFiles,"/",fileName),paste0(path,"/annotationData/chipTypes/",chipName,"/",fileName),overwrite=TRUE)
         
         #change ".Full" in ",Full" in cdf files
@@ -164,13 +166,13 @@ copyChipFiles=function(pathToChipFiles,chipName,path,verbose)
         }
         
         if(verbose)
-          cat("\t DONE.\n")
+          message("\t DONE.\n")
         return(TRUE)
       }
       else
       {
         if(verbose)
-          cat("File name: ",fileName,"doesn't correspond with specified chip name :",chipName ,"\n")
+          message("File name: ",fileName,"doesn't correspond with specified chip name :",chipName ,"\n")
         return(FALSE)
       }
     }
@@ -183,37 +185,37 @@ copyChipFiles=function(pathToChipFiles,chipName,path,verbose)
   )#end lapply
   
   if(sum(unlist(successCopy))==0)
-    cat("No chip files copied.")
+    message("No chip files copied.")
   
   return(invisible(TRUE))   
 }
 
 #check if the chipfiles are good
 #@author Quentin Grimonprez
-.checkChipType=function(chipType,tag,path)
+.checkChipType=function(chipType,tag)
 {
-  if(!suppressPackageStartupMessages(require("aroma.affymetrix", quietly=TRUE) ) )
+  allpkg=TRUE
+  if(!suppressPackageStartupMessages(requireNamespace("aroma.affymetrix", quietly=TRUE) ) )
   {
-    cat("Package not found: aroma.affymetrix. For download it:\n")
-    cat("source(\"http://www.braju.com/R/hbLite.R\")\n")
-    cat(" hbLite(\"sfit\")\n")
-    cat("source(\"http://bioconductor.org/biocLite.R\")\n")
-    cat("biocLite(\"affxparser\")\n")
-    cat("biocLite(\"DNAcopy\")\n")
-    cat("biocLite(\"aroma.light\")\n")
-    #     cat("source(\"http://aroma-project.org/hbLite.R\")\n")
-    cat("install.packages(\"aroma.affymetrix\")\n")
+    message("Package not found: aroma.affymetrix. For download it:\n")
+    message("source(\"http://callr.org/install#HenrikBengtsson/sfit\")\n")
+    message("if (!requireNamespace(\"BiocManager\", quietly = TRUE))\n")
+    message("install.packages(\"BiocManager\")\n")
+    message("BiocManager::install(\"affxparser\")\n")
+    message("BiocManager::install(\"DNAcopy\")\n")
+    message("BiocManager::install(\"aroma.light\")\n")
+    message("install.packages(\"aroma.affymetrix\")\n")
     allpkg=FALSE
   }
   
-  require(aroma.core)
+  if(!allpkg)
+    stop("You have to install some packages : Follow the printed informations.")
   
-  actualPath=getwd()
-  setwd(path)
+  requireNamespace("aroma.core")
+  
   result <- try(cdf <- aroma.affymetrix::AffymetrixCdfFile$byChipType(chipType, tags=tag),silent=TRUE)
   if(class(result)[1]=="try-error")
   {
-    setwd(actualPath)
     stop(geterrmessage())
     #stop(paste0("Problem with cdf files for the chip ",chipType," with tag ",tag))
   }
@@ -237,7 +239,6 @@ copyChipFiles=function(pathToChipFiles,chipName,path,verbose)
   result <- try(gi <- aroma.affymetrix::getGenomeInformation(cdf),silent=TRUE)
   if(class(result)[1]=="try-error")
   {
-    setwd(actualPath)
     stop(geterrmessage())
     #stop(paste0("No ugp files for the chip ",chipType," with tag ",tag))
   }
@@ -245,7 +246,6 @@ copyChipFiles=function(pathToChipFiles,chipName,path,verbose)
   result <- try(si <- aroma.affymetrix::getSnpInformation(cdf),silent=TRUE)
   if(class(result)[1]=="try-error")
   {
-    setwd(actualPath)
     stop(geterrmessage())
     #stop(paste0("No ufl files for the chip ",chipType," with tag ",tag))
   }
@@ -253,15 +253,12 @@ copyChipFiles=function(pathToChipFiles,chipName,path,verbose)
   result <- try(acs <- aroma.core::AromaCellSequenceFile$byChipType(aroma.core::getChipType(cdf, fullname=FALSE)),silent=TRUE)
   if(class(result)[1]=="try-error")
   {
-    setwd(actualPath)
     stop(geterrmessage())
     #stop(paste0("No acs files for the chip ",chipType," with tag ",tag))
   }
 
   
-  setwd(actualPath)
-  
-  return(invisible(TRUE))
+ return(invisible(TRUE))
 }
 
 
@@ -276,7 +273,7 @@ copyChipFiles=function(pathToChipFiles,chipName,path,verbose)
 #' @param path Path where the architecture should be created (default=".")
 #' @param verbose Print information during the process (default=FALSE)
 #' @param tags Common tag which appears in the different file names (cdf, ugp, ufl) of the chip. For no tag, use tags=NULL (default = NULL). See details for more information.
-#'
+#' @return No return value, called for side effects.
 #' @seealso copyChipFiles, copyDataFiles, createAromaArchitecture
 #' 
 #' @details
@@ -285,33 +282,34 @@ copyChipFiles=function(pathToChipFiles,chipName,path,verbose)
 #' Multiples tags must be separated by a comma. If there is no tag, the pattern is <chipType>.cdf
 #' 
 #' @examples
-#' #DO NOT EXECUTE before reading of the vignette
-#' #createArchitecture("test1","GenomeWideSNP_6","./celPATH","./chipPATH",path=".",TRUE,"Full")
+#' \dontrun{
+#' #DO NOT EXECUTE before reading the vignette
+#'   createArchitecture("test1","GenomeWideSNP_6","./celPATH","./chipPATH",path=".",TRUE,"Full")
+#' }
 #' 
 #' @author Quentin Grimonprez
 #' 
 #' @export
 createArchitecture=function(dataSetName,chipType,dataSetPath,chipFilesPath,path=".",verbose=FALSE, tags=NULL)
 {
-  if(!suppressPackageStartupMessages(require("aroma.affymetrix", quietly=TRUE) ) )
+  if(!suppressPackageStartupMessages(requireNamespace("aroma.affymetrix", quietly=TRUE) ) )
   {
-    cat("Package not found: aroma.affymetrix. For download it:\n")
-    cat("source(\"http://www.braju.com/R/hbLite.R\")\n")
-    cat(" hbLite(\"sfit\")\n")
-    cat("source(\"http://bioconductor.org/biocLite.R\")\n")
-    cat("biocLite(\"affxparser\")\n")
-    cat("biocLite(\"DNAcopy\")\n")
-    cat("biocLite(\"aroma.light\")\n")
-    #     cat("source(\"http://aroma-project.org/hbLite.R\")\n")
-    cat("install.packages(\"aroma.affymetrix\")\n")
+    message("Package not found: aroma.affymetrix. For download it:\n")
+    message("source(\"http://callr.org/install#HenrikBengtsson/sfit\")\n")
+    message("if (!requireNamespace(\"BiocManager\", quietly = TRUE))\n")
+    message("install.packages(\"BiocManager\")\n")
+    message("BiocManager::install(\"affxparser\")\n")
+    message("BiocManager::install(\"DNAcopy\")\n")
+    message("BiocManager::install(\"aroma.light\")\n")
+    message("install.packages(\"aroma.affymetrix\")\n")
     allpkg=FALSE
   }
 #   else
-#     cat("Package aroma.affymetrix loaded.\n")
+#     message("Package aroma.affymetrix loaded.\n")
   
    createEmptyArchitecture(dataSetName,chipType,path,verbose)
    copyChipFiles(chipFilesPath,chipType,path,verbose)
-  .checkChipType(chipType,tags,path)
+  .checkChipType(chipType,tags)
    copyDataFiles(dataSetName,dataSetPath,chipType,path,verbose)
 
   

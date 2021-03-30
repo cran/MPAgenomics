@@ -1,4 +1,7 @@
-#' @import R.utils changepoint glmnet cghseg HDPenReg spikeslab
+#' @import R.utils changepoint glmnet HDPenReg spikeslab
+#' @importFrom graphics axis lines par points
+#' @importFrom stats lm mad median optim sd var
+#' @importFrom utils head read.csv write.table
 #' 
 #' @title Multi-Patient Analysis of Genomic Markers
 #' @docType package
@@ -16,8 +19,8 @@
 #'   \tabular{ll}{
 #' Package: \tab MPAgenomics\cr
 #' Type: \tab Package\cr
-#' Version: \tab 1.1.2\cr
-#' Date: \tab 2014-10-29\cr
+#' Version: \tab 1.1.8\cr
+#' Date: \tab 2020-01-16\cr
 #' License: \tab GPL (>=2) \cr
 #' }
 #' 
@@ -25,12 +28,12 @@
 #' 
 #' @author Quentin Grimonprez with contributions from Guillemette Marot and Samuel Blanck
 #'
-#' Maintainer: Samuel Blanck <samuel.blanck@@inria.fr>
+#' Maintainer: Samuel Blanck <samuel.blanck@univ-lille.fr>
 #'  
 #' 
-#' @examples 
+#'@examples \donttest{
 #' #see the vignette for detailed examples
 #' vignette("MPAgenomics")
-#'  
+#'  }
 #' @keywords package
 NULL

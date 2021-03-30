@@ -8,9 +8,7 @@
 #' @param normalTumorArray Only in the case of normal-tumor study. A csv file or a data.frame containing the mapping between normal and tumor files.
 #' The first column contains the name of normal files and the second the names of associated tumor files.
 #' @param chromosome A vector containing the chromosomes to segment.
-#' @param method method of segmentation, either "PELT" or "cghseg".
-#' @param Rho For method="PELT", vector containing all the penalization values to test for the segmentation. If no values are provided, default values will be used.
-#' @param Kmax For method="cghseg", maximal number of segments.
+#' @param Rho A Vector containing all the penalization values to test for the segmentation. If no values are provided, default values will be used.
 #' @param listOfFiles A vector containing the names of the files from the dataSetName to use.
 #' @param onlySNP If TRUE, only the SNP probes will be used.
 #' @param savePlot If TRUE, save the segmented signal in figures folder.
@@ -30,39 +28,39 @@
 #' }
 #'
 #' @examples
+#' \dontrun{
 #' #DO NOT EXECUTE before reading the vignette
-#' # seg1=cnSegCallingProcess("data1",normalTumorArray,chromosome=20:21)
-#' # seg2=cnSegCallingProcess("data2",chromosome=20:21)
+#' seg1=cnSegCallingProcess("data1",normalTumorArray,chromosome=20:21)
+#' seg2=cnSegCallingProcess("data2",chromosome=20:21)
+#' }
 #'
 #' @export
 #' 
 #' @author Quentin Grimonprez
 #' 
-cnSegCallingProcess=function(dataSetName,normalTumorArray,chromosome=1:22,method=c("cghseg","PELT"),Rho=NULL,Kmax=10,listOfFiles=NULL,onlySNP=TRUE,savePlot=TRUE,nclass=3,cellularity=1,...)
+cnSegCallingProcess=function(dataSetName,normalTumorArray,chromosome=1:22,Rho=NULL,listOfFiles=NULL,onlySNP=TRUE,savePlot=TRUE,nclass=3,cellularity=1,...)
 {
-  require(R.devices)
-  method <- match.arg(method)
+  requireNamespace("R.devices")
   allpkg=TRUE
-  if(!suppressPackageStartupMessages(require("aroma.affymetrix", quietly=TRUE) ) )
+  if(!suppressPackageStartupMessages(requireNamespace("aroma.affymetrix", quietly=TRUE) ) )
   {
-    cat("Package not found: aroma.affymetrix. For download it:\n")
-    cat("source(\"http://www.braju.com/R/hbLite.R\")\n")
-    cat(" hbLite(\"sfit\")\n")
-    cat("source(\"http://bioconductor.org/biocLite.R\")\n")
-    cat("biocLite(\"affxparser\")\n")
-    cat("biocLite(\"DNAcopy\")\n")
-    cat("biocLite(\"aroma.light\")\n")
-    #     cat("source(\"http://aroma-project.org/hbLite.R\")\n")
-    cat("install.packages(\"aroma.affymetrix\")\n")
+    message("Package not found: aroma.affymetrix. For download it:\n")
+    message("source(\"http://callr.org/install#HenrikBengtsson/sfit\")\n")
+    message("if (!requireNamespace(\"BiocManager\", quietly = TRUE))\n")
+    message("install.packages(\"BiocManager\")\n")
+    message("BiocManager::install(\"affxparser\")\n")
+    message("BiocManager::install(\"DNAcopy\")\n")
+    message("BiocManager::install(\"aroma.light\")\n")
+    message("install.packages(\"aroma.affymetrix\")\n")
     allpkg=FALSE
   }
   #   else
-  #     cat("Package aroma.affymetrix loaded.\n")
+  #     message("Package aroma.affymetrix loaded.\n")
   
-  if(!suppressPackageStartupMessages(require("aroma.cn", quietly=TRUE) ) )
+  if(!suppressPackageStartupMessages(requireNamespace("aroma.cn", quietly=TRUE) ) )
   {
-    cat("Package not found: aroma.cn. For download it:\n")
-    cat("install.packages(\"aroma.cn\")\n") 
+    message("Package not found: aroma.cn. For download it:\n")
+    message("install.packages(\"aroma.cn\")\n") 
     allpkg=FALSE
   }
 
@@ -70,8 +68,8 @@ cnSegCallingProcess=function(dataSetName,normalTumorArray,chromosome=1:22,method
   if(!allpkg)
     stop("You have to install some packages : Follow the printed informations.")
   
-  require(aroma.core)
-  require(R.filesets)
+  requireNamespace("aroma.core")
+  requireNamespace("R.filesets")
   
   if(!("totalAndFracBData"%in%list.files()))
     stop("There is no \"totalAndFracBData\", check if you are in the good working directory or if you have run the signalPreProcess function before.")
@@ -199,19 +197,17 @@ cnSegCallingProcess=function(dataSetName,normalTumorArray,chromosome=1:22,method
       {
         if (chr==24)
         {
-          cat(paste0("Cannot segment file ",name," chromosome Y (24) : gender = XX\n"))
+          message(paste0("Cannot segment file ",name," chromosome Y (24) : gender = XX\n"))
         } else {
-          cat(paste0("Cannot segment file ",name," chromosome ",chr,  ": less than 2 points in the signal\n"))
+          message(paste0("Cannot segment file ",name," chromosome ",chr,  ": less than 2 points in the signal\n"))
         }
       } else {
       
-        cat(paste0("Segmentation of file ",name," chromosome ",chr,"..."))
+        message(paste0("Segmentation of file ",name," chromosome ",chr,"..."))
 
-        seg=switch(method,
-          PELT=PELT(as.vector(CN[,3]),Rho,CN$position,plot=TRUE,verbose=FALSE),
-          cghseg=cghseg(as.vector(CN[,3]),Kmax,CN$position,plot=TRUE,verbose=FALSE))
-          
-        cat("OK\n")
+        seg=PELT(as.vector(CN[,3]),Rho,CN$position,plot=TRUE,verbose=FALSE)
+        
+        message("OK\n")
         
         if(savePlot)
         {

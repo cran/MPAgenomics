@@ -106,7 +106,7 @@ CGHcall <- function(inputSegmented, prior="auto", nclass=5, organism="human",cel
     }
 
     if(verbose)
-      cat("\n EM algorithm started ... \n");
+      message("\n EM algorithm started ... \n");
     
     dat         <- c()
     datsm       <- c()
@@ -185,8 +185,8 @@ CGHcall <- function(inputSegmented, prior="auto", nclass=5, organism="human",cel
     nregall     <- nrow(regionsdatall)
     if(verbose)
     {
-      cat(paste("Total number of segments present in the data:",nregall,"\n"))
-      cat(paste("Number of segments used for fitting the model:",nreg,"\n"))      
+      message(paste("Total number of segments present in the data:",nregall,"\n"))
+      message(paste("Number of segments used for fitting the model:",nreg,"\n"))      
     }
 
     allnc       <- sapply(1:nreg, .countcl, regionsdat=regionsdat)
@@ -241,7 +241,7 @@ CGHcall <- function(inputSegmented, prior="auto", nclass=5, organism="human",cel
     
     gc()
     if(ncpus>1){
-            trysnow <- try(library(snowfall))  
+            trysnow <- try(requireNamespace("snowfall"))  
             if(class(trysnow)=="try-error") {
             print("You should install 'snowfall' if you want to use parallel computing...")
             print("Escaping to slower computation on 1 cpu")
@@ -251,7 +251,7 @@ CGHcall <- function(inputSegmented, prior="auto", nclass=5, organism="human",cel
         
     while (stop == 0 & iter <= maxiter) {
         gc()#print(gc())
-        #cat("Calling iteration", iter, ":\n")
+        #message("Calling iteration", iter, ":\n")
         posterior0  <- sapply(1:nreg, .posteriorp, priorp=alpha0, pm=bstart, varprofall=varprofall, allsum=allsum, allsumsq=allsumsq, allnc=allnc,allcell=allcell,robustsig=robustsig)
         likprev     <- .totallik(bstart, nreg=nreg, posteriorprev=posterior0, alphaprev=alpha0, varprofall=varprofall, allsum=allsum, allsumsq=allsumsq, allnc=allnc,allcell=allcell,robustsig=robustsig)
         
@@ -301,12 +301,12 @@ CGHcall <- function(inputSegmented, prior="auto", nclass=5, organism="human",cel
         }
         mudl<-printmat[3];mul <- printmat[4];mug<-printmat[6];mudg<- printmat[7];mua<-printmat[8];sdl<-printmat[10];sdg<-printmat[12] #added 17/12
         if(verbose)
-          cat("EM algorithm done ...\n")
+          message("EM algorithm done ...\n")
         best            <- bstart
     
     #now start computing posteriors for ALL data
     if(verbose)
-      cat("Computing posterior probabilities for all segments ...\n")
+      message("Computing posterior probabilities for all segments ...\n")
     #nregall        <- nrow(regionsdatall)
     allncall       <- sapply(1:nregall, .countcl, regionsdat=regionsdatall)
     allsumall      <- sapply(1:nregall, .sumreg, dat=datall, regionsdat=regionsdatall)
@@ -395,7 +395,7 @@ CGHcall <- function(inputSegmented, prior="auto", nclass=5, organism="human",cel
     gc()
     timeFinished <- round((proc.time() - timeStarted)[1] / 60)
     if(verbose)
-      cat("Total time:", timeFinished, "minutes\n")
+      message("Total time:", timeFinished, "minutes\n")
    
     return(listcall)
 }
@@ -461,14 +461,14 @@ callingProcess=function(segmentData,nclass=5,cellularity=1,verbose=TRUE,...)
   
   
   ##calling process
-  cat("Calling process...")
+  message("Calling process...")
   #normalization for better set the zero level
   postseg=postsegnormalize(segmentData)
   #launch calling
   calls=CGHcall(postseg, nclass=nclass,cellularity=cellularity,verbose=verbose,...) 
   #extract results
   res=ExpandCGHcall(calls,postseg,verbose=verbose)
-  cat(" OK\n") 
+  message(" OK\n") 
  
   #convert the calls
   res$calls[res$calls==-2]="double loss"

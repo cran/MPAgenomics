@@ -5,14 +5,17 @@ vers <- paste("R package version", meta$Version)
 author = meta$Author
 title = meta$Title
 
-citEntry(entry = "unpublished",
+citEntry(entry = "article",
          title = "MPAgenomics : An R package for multi-patient analysis of genomic markers",
          author = personList(as.person("Quentin Grimonprez"),
                              as.person("Alain Celisse"),
+                             as.person("Samuel Blanck"),
                              as.person("Meyling Cheok"),
                              as.person("Martin Figeac"),
                              as.person("Guillemette Marot")),
          year = "2014",
-         note = "Preprint",
-         url = "http://hal.inria.fr/hal-00933614",
-         textVersion = paste0("Quentin Grimonprez, Alain Celisse, Meyling Cheok, Martin Figeac, Guillemette Marot"," (2014). ", "MPAgenomics : An R package for multi-patient analysis of genomic markers",". "))
+         journal = "BMC bioinformatics",
+         volume = "15",
+         pages = "394",
+         url="https://doi.org/10.1186/s12859-014-0394-y",
+         textVersion = paste0("Grimonprez Q, Celisse A, Blanck S, Cheok M, Figeac M, Marot G.","MPAgenomics: an R package for multi-patient analysis of genomic markers.","BMC Bioinformatics.", "2014 Dec 14;","15(1)",":394."," doi: 10.1186/s12859-014-0394-y."))

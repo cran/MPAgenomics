@@ -9,7 +9,7 @@
 #' @param genotypeCallsMethod method used for genotypage, default is "naive".
 #' @param savePlot If TRUE, graphics of the CN signal and allele B fraction signal will be saved in the figures folder.
 #' @param tags Common tag which appears in the different file names (cdf, ugp, ufl) of the chip. For no tag, use tags=NULL (default = NULL). See details for more information.
-#' @return NULL
+#' @return No return value, called for side effects.
 #'
 #' @details The aroma architecture must be respected:
 #'    <working directory>
@@ -34,30 +34,29 @@
 SignalNormalization<-function(dataFolder,chipType,normalTumorArray,genotypeCallsMethod="naive",savePlot=TRUE, tags=NULL)
 {
   allpkg=TRUE
-  if(!suppressPackageStartupMessages(require("aroma.affymetrix", quietly=TRUE) ) )
+  if(!suppressPackageStartupMessages(requireNamespace("aroma.affymetrix", quietly=TRUE) ) )
   {
-    cat("Package not found: aroma.affymetrix. For download it:\n")
-    cat("source(\"http://www.braju.com/R/hbLite.R\")\n")
-    cat(" hbLite(\"sfit\")\n")
-    cat("source(\"http://bioconductor.org/biocLite.R\")\n")
-    cat("biocLite(\"affxparser\")\n")
-    cat("biocLite(\"DNAcopy\")\n")
-    cat("biocLite(\"aroma.light\")\n")
-#     cat("source(\"http://aroma-project.org/hbLite.R\")\n")
-    cat("install.packages(\"aroma.affymetrix\")\n")
+    message("Package not found: aroma.affymetrix. For download it:\n")
+    message("source(\"http://callr.org/install#HenrikBengtsson/sfit\")\n")
+    message("if (!requireNamespace(\"BiocManager\", quietly = TRUE))\n")
+    message("install.packages(\"BiocManager\")\n")
+    message("BiocManager::install(\"affxparser\")\n")
+    message("BiocManager::install(\"DNAcopy\")\n")
+    message("BiocManager::install(\"aroma.light\")\n")
+    message("install.packages(\"aroma.affymetrix\")\n")
     allpkg=FALSE
   }
 #   else
-#     cat("Package aroma.affymetrix loaded.\n")
+#     message("Package aroma.affymetrix loaded.\n")
 
-  if(!suppressPackageStartupMessages(require("aroma.cn", quietly=TRUE) ) )
+  if(!suppressPackageStartupMessages(requireNamespace("aroma.cn", quietly=TRUE) ) )
   {
-    cat("Package not found: aroma.cn. For download it:\n")
-    cat("install.packages(\"aroma.cn\")\n") 
+    message("Package not found: aroma.cn. For download it:\n")
+    message("install.packages(\"aroma.cn\")\n") 
     allpkg=FALSE
   }
 #   else
-#     cat("Package aroma.cn loaded.\n")
+#     message("Package aroma.cn loaded.\n")
 
   if(!allpkg)
     stop("You have to install some packages : Follow the printed informations.")
@@ -111,10 +110,10 @@ SignalNormalization<-function(dataFolder,chipType,normalTumorArray,genotypeCalls
   #check if we are in a normal-tumor study or in a single array study
   singleStudy=TRUE
   if(missing(normalTumorArray))
-    cat("No normalTumorArray specified.\n A normalization and a genotype calls will be processed on all the data.\n")
+    message("No normalTumorArray specified.\n A normalization and a genotype calls will be processed on all the data.\n")
   else
   {
-    cat("A normal-tumor normalization will be processed with genotypage calls only for normal case and a tumorboost normalization for the tumor allele B fraction signal.")
+    message("A normal-tumor normalization will be processed with genotypage calls only for normal case and a tumorboost normalization for the tumor allele B fraction signal.")
     singleStudy=FALSE
   }
 
@@ -172,12 +171,11 @@ SignalNormalization<-function(dataFolder,chipType,normalTumorArray,genotypeCalls
 #' The first column contains the name of normal files and the second the names of associated tumor files.
 #' @param dataSetPath (only if createArchitecture=TRUE) Path to the folder containing the CEL files of the data-set.
 #' @param chipFilesPath (only if createArchitecture=TRUE) Path to the folder containing all the annotations files for the specified chip type.
-#' @param path (only if createArchitecture=TRUE) Path where the architecture should be created (default=".").
 #' @param createArchitecture if TRUE, the aroma architecture will be automatically created (default=TRUE). 
 #' CEL files of the data and chip files will be copied (not moved).
 #' @param savePlot if TRUE, graphics of the CN signal and allele B fraction signal will be saved in the figures/signal folder.
 #' @param tags Common tag which appears in the different file names (cdf, ugp, ufl) of the chip. For no tag, use tags=NULL (default = NULL). See details for more information.
-#' 
+#' @return No return value, called for side effects.
 #' @details
 #' The following architecture must be used:
 #'   <working directory>
@@ -205,28 +203,27 @@ SignalNormalization<-function(dataFolder,chipType,normalTumorArray,genotypeCalls
 #' @author Quentin Grimonprez
 #' 
 #' @export
-signalPreProcess=function(dataSetName, chipType, normalTumorArray, dataSetPath, chipFilesPath=dataSetPath, path=".", createArchitecture=TRUE, savePlot=TRUE, tags=NULL)
+signalPreProcess=function(dataSetName, chipType, normalTumorArray, dataSetPath, chipFilesPath=dataSetPath, createArchitecture=TRUE, savePlot=TRUE, tags=NULL)
 {
 
   allpkg=TRUE
-  if(!require("aroma.affymetrix", quietly=TRUE) )
+  if(!requireNamespace("aroma.affymetrix", quietly=TRUE) )
   {
-    cat("Package not found: aroma.affymetrix. For download it:\n")
-    cat("source(\"http://www.braju.com/R/hbLite.R\")\n")
-    cat(" hbLite(\"sfit\")\n")
-    cat("source(\"http://bioconductor.org/biocLite.R\")\n")
-    cat("biocLite(\"affxparser\")\n")
-    cat("biocLite(\"DNAcopy\")\n")
-    cat("biocLite(\"aroma.light\")\n")
-    #     cat("source(\"http://aroma-project.org/hbLite.R\")\n")
-    cat("install.packages(\"aroma.affymetrix\")\n")
+    message("Package not found: aroma.affymetrix. For download it:\n")
+    message("source(\"http://callr.org/install#HenrikBengtsson/sfit\")\n")
+    message("if (!requireNamespace(\"BiocManager\", quietly = TRUE))\n")
+    message("install.packages(\"BiocManager\")\n")
+    message("BiocManager::install(\"affxparser\")\n")
+    message("BiocManager::install(\"DNAcopy\")\n")
+    message("BiocManager::install(\"aroma.light\")\n")
+    message("install.packages(\"aroma.affymetrix\")\n")
     allpkg=FALSE
   }
     
-  if(!require("aroma.cn", quietly=TRUE) )
+  if(!requireNamespace("aroma.cn", quietly=TRUE) )
   {
-    cat("Package not found: aroma.cn. For download it:\n")
-    cat("hbInstall(\"aroma.cn\")\n") 
+    message("Package not found: aroma.cn. For download it:\n")
+    message("install.packages(\"aroma.cn\")\n")
     allpkg=FALSE
   }
   
@@ -235,11 +232,7 @@ signalPreProcess=function(dataSetName, chipType, normalTumorArray, dataSetPath, 
   
   if(createArchitecture==TRUE)
   {
-    actualPath=getwd()
-    createArchitecture(dataSetName,chipType,dataSetPath,chipFilesPath,path,TRUE,tags)
-    
-    #move to the path of the created Architecture
-    setwd(path)
+    createArchitecture(dataSetName,chipType,dataSetPath,chipFilesPath,verbose=TRUE,tags=tags)
   }
 
   SignalNormalization(dataSetName,chipType,normalTumorArray,"naive",savePlot,tags)

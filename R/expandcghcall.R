@@ -45,7 +45,7 @@ ExpandCGHcall <- function(listcall,inputSegmented, digits=3,divide=4, memeff = F
   adjustForCellularity <- function(matrix, cellularity,pmode) {
     if(verbose)
     {
-      if(pmode=="seg") cat("Adjusting segmented data for cellularity ... \n") else cat("Adjusting normalized data for cellularity ... \n")
+      if(pmode=="seg") message("Adjusting segmented data for cellularity ... \n") else message("Adjusting normalized data for cellularity ... \n")
     }
         result  <- c();
         adjustCellularity <- function(value, cellularity) {
@@ -58,7 +58,7 @@ ExpandCGHcall <- function(listcall,inputSegmented, digits=3,divide=4, memeff = F
         }
         for (i in 1:ncol(matrix)) {
             if(verbose)
-              cat("Cellularity sample", i, ": ", cellularity[i], "\n");
+              message("Cellularity sample", i, ": ", cellularity[i], "\n");
             if (cellularity[i] < 1) {
                 new.column  <- sapply(matrix[,i], adjustCellularity, cellularity[i]);
                 result      <- cbind(result, new.column);
@@ -216,9 +216,9 @@ ExpandCGHcall <- function(listcall,inputSegmented, digits=3,divide=4, memeff = F
   }
   
   if(verbose)
-    cat("FINISHED!\n")
+    message("FINISHED!\n")
   timeFinished <- round((proc.time() - timeStarted)[1] / 60)
   if(verbose)
-    cat("Total time:", timeFinished, "minutes\n")
+    message("Total time:", timeFinished, "minutes\n")
   if (memeff) print("Results printed to separate files") else return(result)
 }

@@ -22,9 +22,11 @@
 #' To easily access the names of the files available in a dataset, one can use the \link{getListOfFiles} function.
 #' 
 #' @examples 
-#' #DO NOT EXECUTE
-#' #fracB=getSymFracBSignal("data1",5,normalTumorArray)
-#' #fracB=getSymFracBSignal("data2",5)
+#' \dontrun{
+#' #DO NOT EXECUTE before reading the vignette
+#' fracB=getSymFracBSignal("data1",5,normalTumorArray)
+#' fracB=getSymFracBSignal("data2",5)
+#' }
 #'
 #' @author Quentin Grimonprez
 #'
@@ -32,38 +34,37 @@
 getSymFracBSignal=function(dataSetName,file,chromosome,normalTumorArray,verbose=TRUE)
 {
   allpkg=TRUE
-  if(!suppressPackageStartupMessages(require("aroma.affymetrix", quietly=TRUE) ) )
+  if(!suppressPackageStartupMessages(requireNamespace("aroma.affymetrix", quietly=TRUE) ) )
   {
-    cat("Package not found: aroma.affymetrix. For download it:\n")
-    cat("source(\"http://www.braju.com/R/hbLite.R\")\n")
-    cat(" hbLite(\"sfit\")\n")
-    cat("source(\"http://bioconductor.org/biocLite.R\")\n")
-    cat("biocLite(\"affxparser\")\n")
-    cat("biocLite(\"DNAcopy\")\n")
-    cat("biocLite(\"aroma.light\")\n")
-    #     cat("source(\"http://aroma-project.org/hbLite.R\")\n")
-    cat("install.packages(\"aroma.affymetrix\")\n")
+    message("Package not found: aroma.affymetrix. For download it:\n")
+    message("source(\"http://callr.org/install#HenrikBengtsson/sfit\")\n")
+    message("if (!requireNamespace(\"BiocManager\", quietly = TRUE))\n")
+    message("install.packages(\"BiocManager\")\n")
+    message("BiocManager::install(\"affxparser\")\n")
+    message("BiocManager::install(\"DNAcopy\")\n")
+    message("BiocManager::install(\"aroma.light\")\n")
+    message("install.packages(\"aroma.affymetrix\")\n")
     allpkg=FALSE
   }
   #   else
-  #     cat("Package aroma.affymetrix loaded.\n")
+  #     message("Package aroma.affymetrix loaded.\n")
   
-  if(!suppressPackageStartupMessages(require("aroma.cn", quietly=TRUE) ) )
+  if(!suppressPackageStartupMessages(requireNamespace("aroma.cn", quietly=TRUE) ) )
   {
-    cat("Package not found: aroma.cn. For download it:\n")
-    cat("install.packages(\"aroma.cn\")\n") 
+    message("Package not found: aroma.cn. For download it:\n")
+    message("install.packages(\"aroma.cn\")\n") 
     allpkg=FALSE
   }
   #   else
-  #     cat("Package aroma.cn loaded.\n")
+  #     message("Package aroma.cn loaded.\n")
   
   
   if(!allpkg)
     stop("You have to install some packages : Follow the printed informations.")
   
-  require(aroma.core)
-  require(R.filesets)
-  require(R.methodsS3)
+  requireNamespace("aroma.core")
+  requireNamespace("R.filesets")
+  requireNamespace("R.methodsS3")
   
   if(!("totalAndFracBData"%in%list.files()))
     stop("There is no \"totalAndFracBData\", check if you are in the good working directory or if you have run the signalPreProcess function before.")
@@ -95,13 +96,13 @@ getSymFracBSignal=function(dataSetName,file,chromosome,normalTumorArray,verbose=
   if(missing(normalTumorArray))
   {
     if(verbose)
-      #cat("No normalTumorArray specified.\n The allele B fraction signal will be extracted for all the specified data.\n")    
+      #message("No normalTumorArray specified.\n The allele B fraction signal will be extracted for all the specified data.\n")    
       stop("No normalTumorArray specified.\n Youd need to specify a normalTumorArray to extract and symmetrize allele B fraction")
   }
 #   else
 #   {
 #     if(verbose)
-#       cat("The allele B fraction signal will be extracted for normal and tumor signals. The normalized tumorboost allele B fraction signal will be extracted for tumor signal.")
+#       message("The allele B fraction signal will be extracted for normal and tumor signals. The normalized tumorboost allele B fraction signal will be extracted for tumor signal.")
 #     singleStudy=FALSE
 #   }
   
@@ -197,7 +198,7 @@ getSymFracBSignal=function(dataSetName,file,chromosome,normalTumorArray,verbose=
   platform <- aroma.core::getPlatform(ugp);
   if (platform == "Affymetrix") 
   {
-    require("aroma.affymetrix") || R.methodsS3::throw("Package not loaded: aroma.affymetrix");
+    requireNamespace("aroma.affymetrix") || R.methodsS3::throw("Package not loaded: aroma.affymetrix");
     snpPattern <- "^SNP|^S-";
   } 
   else if (platform == "Illumina") 

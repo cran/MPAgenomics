@@ -11,10 +11,10 @@
 #
 tumorboost<-function(dataSetName,normalTumorArray,plot=TRUE)
 {
-  require(aroma.cn)
-  require(aroma.core)
-  require(R.devices)
-  require(R.filesets)
+  requireNamespace("aroma.cn")
+  requireNamespace("aroma.core")
+  requireNamespace("R.devices")
+  requireNamespace("R.filesets")
   
   log <- verbose <- Arguments$getVerbose(-1, timestamp=TRUE);
   rootPath <- "totalAndFracBData";
@@ -157,11 +157,11 @@ tumorboost<-function(dataSetName,normalTumorArray,plot=TRUE)
 #
 tumorboostPlot=function(ds,dsList,dataSetName,normalTumorArray,tumorSample,normalSample,dsC,normalTumorMatrixC)
 {
-  require(aroma.affymetrix)
-  require(aroma.core)
-  require(R.filesets)
-  require(R.methodsS3)
-  require(R.oo)
+  requireNamespace("aroma.affymetrix")
+  requireNamespace("aroma.core")
+  requireNamespace("R.filesets")
+  requireNamespace("R.methodsS3")
+  requireNamespace("R.oo")
   
   ########## load the total copy number signal for a pair (normal,tumor) 
   pairC <- normalTumorMatrixC[normalTumorMatrixC[,2]==tumorSample,]
@@ -199,7 +199,7 @@ tumorboostPlot=function(ds,dsList,dataSetName,normalTumorArray,tumorSample,norma
   platform <- aroma.core::getPlatform(ugp);
   if (platform == "Affymetrix") 
   {
-    require("aroma.affymetrix") || R.methodsS3::throw("Package not loaded: aroma.affymetrix");
+    requireNamespace("aroma.affymetrix") || R.methodsS3::throw("Package not loaded: aroma.affymetrix");
     snpPattern <- "^SNP|^S-";
   } 
   else if (platform == "Illumina") 
@@ -211,7 +211,7 @@ tumorboostPlot=function(ds,dsList,dataSetName,normalTumorArray,tumorSample,norma
     R.methodsS3::throw("Unknown platform: ", platform);
   }
   
-  cat("Saving graphics for sample ",R.filesets::getNames(dsC[tumorSample]),"\n")
+  message("Saving graphics for sample ",R.filesets::getNames(dsC[tumorSample]),"\n")
   
   #find ploidy for chromosome 23 and 24
   gender=findGender(R.oo::getName(dsC),normalSample,ugp)
@@ -291,6 +291,8 @@ tumorboostPlot=function(ds,dsList,dataSetName,normalTumorArray,tumorSample,norma
     ylab <- "Copy number";
     
     # Plot total CNs
+    opar <- par(no.readonly =TRUE)      
+    on.exit(par(opar))      
     fig <- R.devices::devNew("png", pathname, label=figName, width=width, height=4*aspect*width);
     par(mfrow=c(4,1))
     par(mar=c(2.7,2.5,1.1,1)+0.1, tcl=-0.3, mgp=c(1.4,0.4,0), cex=2);
@@ -324,7 +326,7 @@ tumorboostPlot=function(ds,dsList,dataSetName,normalTumorArray,tumorSample,norma
       stext(side=3, pos=1, chrTag); 
     }
     R.devices::devDone();
-    cat("*")
+    #cat("*")
     
     
   }##end boucle chromosome

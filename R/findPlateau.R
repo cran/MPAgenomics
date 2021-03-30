@@ -99,14 +99,14 @@ findPlateau=function(resSeg,Rho,plot=TRUE,verbose=TRUE)
     
     rho=maxPlateau[1]
     if(verbose)
-      cat("optimal parameter: ",maxPlateau[1],"\n")
+      message("optimal parameter: ",maxPlateau[1],"\n")
   }
   else
   {
     plateau=matrix(rep(NA,3),nrow=1)
     rho=Rho[length(resSeg)]
     if(verbose)
-      cat("optimal parameter: ",rho,"\n")
+      message("optimal parameter: ",rho,"\n")
   }
   
   res=list(rho=rho,maxPlateau=maxPlateau,plateau=plateau)

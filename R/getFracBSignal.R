@@ -23,9 +23,12 @@
 #'  
 #' 
 #' @examples 
+#' \dontrun{
 #' #DO NOT EXECUTE before reading the vignette
-#' #fracB=getFracBSignal("data1",5,normalTumorArray)
-#' #fracB=getFracBSignal("data2",5)
+#'   fracB=getFracBSignal("data1",5,normalTumorArray)
+#'   fracB=getFracBSignal("data2",5)
+#' }
+#' 
 #'
 #' @author Quentin Grimonprez
 #'
@@ -33,38 +36,36 @@
 getFracBSignal=function(dataSetName,chromosome,normalTumorArray,listOfFiles=NULL,verbose=TRUE)
 {
   allpkg=TRUE
-  allpkg=TRUE
-  if(!suppressPackageStartupMessages(require("aroma.affymetrix", quietly=TRUE) ) )
+  if(!suppressPackageStartupMessages(requireNamespace("aroma.affymetrix", quietly=TRUE) ) )
   {
-    cat("Package not found: aroma.affymetrix. For download it:\n")
-    cat("source(\"http://www.braju.com/R/hbLite.R\")\n")
-    cat(" hbLite(\"sfit\")\n")
-    cat("source(\"http://bioconductor.org/biocLite.R\")\n")
-    cat("biocLite(\"affxparser\")\n")
-    cat("biocLite(\"DNAcopy\")\n")
-    cat("biocLite(\"aroma.light\")\n")
-    #     cat("source(\"http://aroma-project.org/hbLite.R\")\n")
-    cat("install.packages(\"aroma.affymetrix\")\n")
+    message("Package not found: aroma.affymetrix. For download it:\n")
+    message("source(\"http://callr.org/install#HenrikBengtsson/sfit\")\n")
+    message("if (!requireNamespace(\"BiocManager\", quietly = TRUE))\n")
+    message("install.packages(\"BiocManager\")\n")
+    message("BiocManager::install(\"affxparser\")\n")
+    message("BiocManager::install(\"DNAcopy\")\n")
+    message("BiocManager::install(\"aroma.light\")\n")
+    message("install.packages(\"aroma.affymetrix\")\n")
     allpkg=FALSE
   }
   #   else
-  #     cat("Package aroma.affymetrix loaded.\n")
+  #     message("Package aroma.affymetrix loaded.\n")
   
-  if(!suppressPackageStartupMessages(require("aroma.cn", quietly=TRUE) ) )
+  if(!suppressPackageStartupMessages(requireNamespace("aroma.cn", quietly=TRUE) ) )
   {
-    cat("Package not found: aroma.cn. For download it:\n")
-    cat("install.packages(\"aroma.cn\")\n") 
+    message("Package not found: aroma.cn. For download it:\n")
+    message("install.packages(\"aroma.cn\")\n") 
     allpkg=FALSE
   }
   #   else
-  #     cat("Package aroma.cn loaded.\n")
+  #     message("Package aroma.cn loaded.\n")
     
   if(!allpkg)
     stop("You have to install some packages : Follow the printed informations.")
 
-  require(aroma.core)
-  require(R.filesets)
-  require(R.methodsS3)
+  requireNamespace("aroma.core")
+  requireNamespace("R.filesets")
+  requireNamespace("R.methodsS3")
   
   if(!("totalAndFracBData"%in%list.files()))
     stop("There is no \"totalAndFracBData\", check if you are in the good working directory or if you have run the signalPreProcess function before.")
@@ -96,13 +97,13 @@ getFracBSignal=function(dataSetName,chromosome,normalTumorArray,listOfFiles=NULL
   if(missing(normalTumorArray))
   {
     if(verbose)
-      cat("No normalTumorArray specified.\n The allele B fraction signal will be extracted for all the specified data.\n")
+      message("No normalTumorArray specified.\n The allele B fraction signal will be extracted for all the specified data.\n")
       #stop("No normalTumorArray specified.\n Youd need to specify a normalTumorArray to extract allele B fraction")
   }
   else
   {
     if(verbose)
-     cat("The allele B fraction signal will be extracted for normal and tumor signals. The normalized tumorboost allele B fraction signal will be extracted for tumor signal.\n")
+     message("The allele B fraction signal will be extracted for normal and tumor signals. The normalized tumorboost allele B fraction signal will be extracted for tumor signal.\n")
     singleStudy=FALSE
   }
   
@@ -198,7 +199,7 @@ getFracBSignal=function(dataSetName,chromosome,normalTumorArray,listOfFiles=NULL
   platform <- aroma.core::getPlatform(ugp);
   if (platform == "Affymetrix") 
   {
-    require("aroma.affymetrix") || R.methodsS3::throw("Package not loaded: aroma.affymetrix");
+    requireNamespace("aroma.affymetrix") || R.methodsS3::throw("Package not loaded: aroma.affymetrix");
     snpPattern <- "^SNP|^S-";
   } 
   else if (platform == "Illumina") 
@@ -265,9 +266,9 @@ getFracBSignal=function(dataSetName,chromosome,normalTumorArray,listOfFiles=NULL
 #
 getFracBSignalSingleStudy=function(ds,units,indexOfFiles)
 {    
-  require(aroma.affymetrix)
-  require(aroma.cn)
-  require(R.filesets)
+  requireNamespace("aroma.affymetrix")
+  requireNamespace("aroma.cn")
+  requireNamespace("R.filesets")
   
   #reduce to the files from indexOfFiles
   ds=extract(ds,indexOfFiles)
@@ -296,10 +297,10 @@ getFracBSignalSingleStudy=function(ds,units,indexOfFiles)
 #
 getFracBSignalPairedStudy=function(ds,units,normalTumorArray,normalFiles)
 {  
-  require(aroma.affymetrix)
-  require(aroma.cn)
-  require(aroma.core)
-  require(R.filesets)
+  requireNamespace("aroma.affymetrix")
+  requireNamespace("aroma.cn")
+  requireNamespace("aroma.core")
+  requireNamespace("R.filesets")
   
   #id of normal files
   normalId=sapply(normalFiles,FUN=function(x,names){which(names==x)},R.filesets::getNames(ds))
